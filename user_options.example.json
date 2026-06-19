@@ -31,7 +31,7 @@
       "location": "an airship deck"
     }
   },
-  "_comment_cosplayers": "'cosplayers' adds characters to the Cosplayer node. 'costume' (worn items only, no held weapons) is required; 'franchise' and 'gender' (Female/Male, used only for Random scoping) are optional; 'signature' (applied in both modes) and 'physique' (Full character only) are {field: value} maps of valid options. Add gender:Male entries to populate 'Random - male'.",
+  "_comment_cosplayers": "'cosplayers' adds characters to the Cosplayer node. 'costume' (worn items only, no held weapons) is required; 'franchise' and 'gender' (Female/Male, used only for Random scoping) are optional; 'signature' (applied in both modes) and 'physique' (Full character only) are {field: value} maps of valid options. Add gender:Male entries to populate 'Random - male'. Set 'covers_face': true for a fully masked head to drop the randomized face/hair so only the mask is described. Keep text plain ASCII (no em dashes or smart quotes).",
   "cosplayers": {
     "Custom Hero (My OC)": {
       "franchise": "Original",
@@ -39,6 +39,12 @@
       "costume": "a teal-and-silver bodysuit with a star emblem, white gloves, and white boots",
       "signature": {"hair_color": "electric blue", "hair_length": "long", "eye_color": "bright green"},
       "physique": {"body_type": "athletic", "height": "tall"}
+    },
+    "Masked Vigilante (My OC)": {
+      "franchise": "Original",
+      "gender": "Male",
+      "covers_face": true,
+      "costume": "a matte-black armored bodysuit with a full face helmet and a hooded cape"
     }
   }
 }

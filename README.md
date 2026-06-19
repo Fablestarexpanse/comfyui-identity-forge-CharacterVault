@@ -24,7 +24,7 @@ can splice into a larger prompt.
 | --- | --- |
 | **Identity Forge** | 70+ lockable dropdown fields (8 collapsible groups) + a constraint engine → `prompt_text` (prose) and `prompt_json`. |
 | **Identity Forge Archetype** | Dozens of themed presets (knight, sorceress, pirate, ninja, samurai, pop star, astronaut, surgeon…) that wire into Identity Forge to set the *look* while the person underneath randomizes. |
-| **Identity Forge Cosplayer** | Fictional characters (2B, Lara Croft, Sailor Moon, She-Hulk, Zelda…) as a *cosplay look* — the costume is locked onto a random, optionally cross-gender person. |
+| **Identity Forge Cosplayer** | Fictional characters (Spider-Man, Batman, Darth Vader, Cloud, 2B, She-Hulk, Zelda…) as a *cosplay look* — the costume is locked onto a random, optionally cross-gender person. |
 
 Built on the ComfyUI **V3 API** (`comfy_api.latest`). Category:
 `conditioning/character`.
@@ -115,6 +115,9 @@ prefixed `Cosplaying as <Character> (<Franchise>):`.
 - **Crossplay just works.** The character's gender only scopes the `Random …`
   picks — the *person's* gender is the Identity Forge `gender` widget. Aim a female
   character at a `Male` node and you get a man in that costume.
+- **Full-mask characters look right.** Entries whose head is fully covered (Spider-
+  Man, a Mandalorian helmet, a ninja hood) suppress the randomized face/hair so
+  only the mask is described — no stray face fighting the costume at render time.
 - Shares the `archetype_json` socket with the Archetype node (use one or the
   other). Held props/weapons are left out on purpose — add them in the prompt.
 
@@ -193,7 +196,8 @@ restart ComfyUI. Four optional sections:
 - **`cosplayers`** adds characters to the **Cosplayer** node. `costume` (worn
   items only) is required; `franchise`/`gender` are optional; `signature` (both
   modes) and `physique` (Full character) are `{field: value}` maps. A `gender:
-  "Male"` entry is how you populate the `Random — male` pick.
+  "Male"` entry is how you populate the `Random — male` pick. Set
+  `"covers_face": true` for a fully masked head to drop the randomized face/hair.
 
 A user entry whose name matches a built-in **overrides** it. Run
 `python tests/validate_data.py` to check that your custom field values are valid

@@ -113,6 +113,7 @@ def build_cosplayer_json(
         ("franchise", entry.get("franchise", "")),
         ("gender", entry.get("gender", "Any")),
         ("look_level", look_level),
+        ("covers_face", bool(entry.get("covers_face", False))),
     ])
     document.update(group_fields(fields))
     return json.dumps(document, indent=2)

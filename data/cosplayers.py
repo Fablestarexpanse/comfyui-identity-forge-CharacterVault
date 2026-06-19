@@ -11,6 +11,8 @@ Schema per entry (keyed by character name)::
     "2B": {
         "franchise": "NieR: Automata",   # shown in the cosplay label
         "gender":    "Female",            # SOURCE character gender — for Random scoping only
+        "covers_face": True,              # OPTIONAL — full mask/helmet: drop the randomized
+                                          #   face/hair/makeup so only the costume shows
         "costume":   "a gothic black ...",# → IdentityForge's hidden outfit_description
         "signature": {                    # iconic, field-mappable look — applied in BOTH modes
             "hair_color": "platinum blonde", "hair_length": "chin length bob",
@@ -37,6 +39,13 @@ Curation rules (so the data stays coherent with the engine):
   orange skin, montrals, antennae, wings, scales) live in ``costume`` as worn
   cosplay elements, and ``skin_tone`` is left out so the person underneath
   randomizes.
+* **Full masks/helmets** (Spider-Man, a Mandalorian helmet, a ninja hood) set
+  ``"covers_face": True`` so IdentityForge drops the randomized face, hair and
+  makeup that would otherwise be described fighting the mask. Omit it whenever
+  the face is visible (an open cowl, body-painted-but-visible face, domino mask).
+* **Plain ASCII only.** Costume text and the character name reach the prompt, so
+  avoid em/en dashes, smart quotes and ellipses (use ``-``, ``'``, ``...``);
+  some text-to-image tokenizers mangle them.
 
 This is a curated starter set; new characters can be added incrementally — just
 follow the schema and keep values valid against ``data/fields.py``.
@@ -846,7 +855,7 @@ COSPLAYERS: dict[str, dict] = {
     "She-Hulk": {
         "franchise": "Marvel",
         "gender": "Female",
-        "costume": "a purple-and-white athletic leotard, with all-over leaf-green body "
+        "costume": "a purple-and-white athletic leotard, with all-over rich green body "
                    "paint",
         "signature": {"hair_color": "emerald green", "hair_length": "slightly past shoulders",
                       "hair_texture": "loosely wavy", "eye_color": "emerald"},
@@ -1171,6 +1180,1190 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "dark brown", "hair_length": "slightly past shoulders",
                       "hair_style": "low ponytail", "eye_color": "dark brown"},
         "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "light medium"},
+    },
+
+    # --- Additional Marvel / DC women -------------------------------------
+    "Black Cat": {
+        "franchise": "Marvel",
+        "gender": "Female",
+        "costume": "a sleek black catsuit with a white fur collar and cuffs, a black "
+                   "domino mask, and black gloves and boots",
+        "signature": {"hair_color": "platinum blonde", "hair_length": "long",
+                      "hair_style": "worn down", "eye_color": "green"},
+        "physique": {"body_type": "curvy", "height": "average height", "skin_tone": "fair"},
+    },
+    "X-23": {
+        "franchise": "Marvel",
+        "gender": "Female",
+        "costume": "tight black and gray combat gear, fingerless gloves, reinforced "
+                   "boots, and metal claws extending from the knuckles of each hand",
+        "signature": {"hair_color": "dark brown", "hair_length": "long",
+                      "hair_texture": "sleek straight", "eye_color": "green"},
+        "physique": {"body_type": "athletic", "height": "very petite", "skin_tone": "tan"},
+    },
+    "Emma Frost": {
+        "franchise": "Marvel",
+        "gender": "Female",
+        "costume": "a white form-fitting bodysuit with a white cape, white gloves, and "
+                   "white thigh-high boots",
+        "signature": {"hair_color": "platinum blonde", "hair_length": "slightly past shoulders",
+                      "hair_texture": "wavy", "eye_color": "ice blue"},
+        "physique": {"body_type": "curvy", "height": "tall", "skin_tone": "porcelain"},
+    },
+    "Jubilee": {
+        "franchise": "Marvel",
+        "gender": "Female",
+        "costume": "a bright yellow trench coat over a casual outfit, yellow gloves, pink "
+                   "sunglasses, sneakers, and yellow-streaked hair",
+        "signature": {"hair_color": "jet black", "hair_length": "long",
+                      "hair_style": "worn down", "eye_color": "dark brown"},
+        "physique": {"body_type": "slim", "height": "petite", "skin_tone": "light medium"},
+    },
+    "Ms. Marvel": {
+        "franchise": "Marvel",
+        "gender": "Female",
+        "costume": "a blue and red costume with a gold lightning-bolt emblem, a red scarf, "
+                   "a domino mask, red gloves, and blue boots",
+        "signature": {"hair_color": "jet black", "hair_length": "long",
+                      "hair_texture": "wavy", "eye_color": "dark brown"},
+        "physique": {"body_type": "athletic", "height": "petite", "skin_tone": "caramel"},
+    },
+    "Spider-Woman": {
+        "franchise": "Marvel",
+        "gender": "Female",
+        "costume": "a red and yellow bodysuit with a black spider-web pattern across the "
+                   "chest and arms, red gloves, and red boots",
+        "signature": {"hair_color": "jet black", "hair_length": "long",
+                      "hair_style": "worn down", "eye_color": "dark brown"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "olive"},
+    },
+    "Hela": {
+        "franchise": "Marvel",
+        "gender": "Female",
+        "costume": "a sleek form-fitting black and deep green bodysuit with swirling "
+                   "patterns, a dark flowing cape, and a black antler-like headdress",
+        "signature": {"hair_color": "raven black", "hair_length": "long",
+                      "hair_style": "slicked back", "eye_color": "green"},
+        "physique": {"body_type": "lean", "height": "tall", "skin_tone": "pale"},
+    },
+    "Domino": {
+        "franchise": "Marvel",
+        "gender": "Female",
+        "costume": "a black leather bodysuit with minimal white accents, black boots, and "
+                   "black gloves, with a black circular marking painted around the left eye",
+        "signature": {"hair_color": "jet black", "hair_length": "ear length",
+                      "hair_style": "worn down", "eye_color": "ice blue"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "very pale"},
+    },
+    "Dazzler": {
+        "franchise": "Marvel",
+        "gender": "Female",
+        "costume": "a silver disco outfit with a metallic halter top and shorts, silver "
+                   "gloves, and silver roller skates",
+        "signature": {"hair_color": "golden blonde", "hair_length": "long",
+                      "hair_texture": "wavy", "eye_color": "bright blue"},
+        "physique": {"body_type": "slender", "height": "average height", "skin_tone": "fair"},
+    },
+    "Polaris": {
+        "franchise": "Marvel",
+        "gender": "Female",
+        "costume": "a form-fitting green bodysuit with metallic accents, green gloves, and "
+                   "green boots",
+        "signature": {"hair_color": "emerald green", "hair_length": "long",
+                      "hair_style": "worn down", "eye_color": "green"},
+        "physique": {"body_type": "slender", "height": "average height", "skin_tone": "fair"},
+    },
+    "Big Barda": {
+        "franchise": "DC",
+        "gender": "Female",
+        "costume": "metallic blue and gold high-tech armor with massive golden shoulder "
+                   "pauldrons, armored boots, and a cape with cosmic designs",
+        "signature": {"hair_color": "raven black", "hair_length": "long",
+                      "hair_style": "worn down", "eye_color": "bright blue"},
+        "physique": {"body_type": "athletic", "height": "very tall", "skin_tone": "fair"},
+    },
+    "Cheetah": {
+        "franchise": "DC",
+        "gender": "Female",
+        "costume": "an all-over coat of golden spotted cheetah-fur body paint, pointed "
+                   "ears, a fanged grin, and a spotted bikini-style outfit",
+        "signature": {"hair_color": "warm brown", "hair_length": "long",
+                      "hair_style": "worn down", "eye_color": "bright green"},
+        "physique": {"body_type": "athletic", "height": "tall"},
+    },
+    "Mera": {
+        "franchise": "DC",
+        "gender": "Female",
+        "costume": "a form-fitting green bodysuit with scale patterns, golden armor "
+                   "pieces, and royal golden accessories",
+        "signature": {"hair_color": "bright red", "hair_length": "long",
+                      "hair_texture": "wavy", "eye_color": "emerald"},
+        "physique": {"body_type": "curvy", "height": "tall", "skin_tone": "fair"},
+    },
+
+    # --- Additional women (other franchises) ------------------------------
+    "Rainbow Brite": {
+        "franchise": "Rainbow Brite",
+        "gender": "Female",
+        "costume": "a blue dress with rainbow-striped sleeves and skirt trim, a yellow "
+                   "star emblem, a rainbow belt, puffy boots, and a rainbow ribbon in "
+                   "the hair",
+        "signature": {"hair_color": "golden blonde", "hair_length": "long",
+                      "hair_style": "high ponytail", "eye_color": "bright blue"},
+        "physique": {"body_type": "petite and slim", "height": "petite", "skin_tone": "fair"},
+    },
+    "Smurfette": {
+        "franchise": "The Smurfs",
+        "gender": "Female",
+        "costume": "a white dress and white high-heeled shoes, with all-over light blue "
+                   "Smurf skin body paint",
+        "signature": {"hair_color": "golden blonde", "hair_length": "long",
+                      "hair_style": "worn down", "eye_color": "bright blue"},
+        "physique": {"body_type": "petite and slim", "height": "very petite"},
+    },
+    "Liara T'Soni": {
+        "franchise": "Mass Effect",
+        "gender": "Female",
+        "costume": "a white and blue sleeveless top with a high collar, dark fitted "
+                   "pants, and practical boots, with all-over light blue Asari skin body "
+                   "paint and a smooth cartilage head crest",
+        "signature": {"eye_color": "bright blue"},
+        "physique": {"body_type": "slender", "height": "average height"},
+    },
+
+    # ======================================================================
+    # MALE CHARACTERS
+    # Worn items only (held props/weapons dropped); non-human skin as body
+    # paint with skin_tone omitted; full-mask characters carry no signature
+    # hair/eyes. Iconic facial hair uses the gendered `facial_hair` field, so
+    # it applies to a male person and is dropped for crossplay to a female.
+    # ======================================================================
+
+    # --- Marvel (male) ----------------------------------------------------
+    "Spider-Man": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a skintight red and blue bodysuit with black webbing lines across the "
+                   "red, a large black spider emblem on the chest, a full face mask with "
+                   "large white teardrop eye lenses, red gloves, and red boots",
+        "physique": {"body_type": "lean", "height": "average height"},
+    },
+    "Iron Man": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a glossy hot-rod red and gold plated powered exosuit with a glowing "
+                   "circular arc reactor in the chest, narrow glowing eye slits in the "
+                   "faceplate, and articulated armored gauntlets and boots",
+        "physique": {"body_type": "athletic", "height": "average height"},
+    },
+    "Tony Stark": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "costume": "a tailored dark suit with tinted aviator sunglasses and a faint blue "
+                   "arc reactor glow at the chest",
+        "signature": {"hair_color": "dark brown", "hair_length": "very short",
+                      "facial_hair": "goatee", "eye_color": "medium brown"},
+        "physique": {"body_type": "fit", "height": "average height", "skin_tone": "fair"},
+    },
+    "Captain America": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "costume": "a blue scale-textured uniform with a white star on the chest, red and "
+                   "white horizontal stripes across the midsection, a snug blue cowl with "
+                   "a white A, red gloves, and red boots",
+        "signature": {"hair_color": "golden blonde", "hair_length": "very short",
+                      "eye_color": "bright blue"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+    },
+    "Thor": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "costume": "sleeveless silver and black armor with rows of circular silver chest "
+                   "discs, a flowing red cape, and engraved bracers",
+        "signature": {"hair_color": "golden blonde", "hair_length": "long",
+                      "facial_hair": "short beard", "eye_color": "bright blue"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+    },
+    "Hulk": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "costume": "only torn purple trousers, with all-over rich green body paint over "
+                   "enormous muscles",
+        "signature": {"hair_color": "near black", "hair_length": "very short",
+                      "eye_color": "green"},
+        "physique": {"body_type": "athletic", "height": "very tall"},
+    },
+    "Wolverine": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "costume": "a yellow and blue tactical suit with black side panels, a yellow mask "
+                   "with pointed peaks, and metal claws extending between the knuckles of "
+                   "each fist",
+        "signature": {"hair_color": "jet black", "hair_length": "very short",
+                      "facial_hair": "mutton chops", "eye_color": "hazel"},
+        "physique": {"body_type": "stocky", "height": "short", "skin_tone": "fair"},
+    },
+    "Deadpool": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a skintight red and black bodysuit with black side panels, a full red "
+                   "and black mask with white teardrop eye patches, leg holsters, and "
+                   "ammo pouches and belts",
+        "physique": {"body_type": "athletic", "height": "average height"},
+    },
+    "Black Panther": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a sleek matte-black vibranium catsuit with a faint raised silver "
+                   "triangular weave, a panther mask with small rounded ears, and a silver "
+                   "vibranium necklace",
+        "physique": {"body_type": "athletic", "height": "tall"},
+    },
+    "Doctor Strange": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "costume": "a dark blue tunic with a wide sash and high collar, a flowing red "
+                   "Cloak of Levitation with a tall collar, and a golden Eye of Agamotto "
+                   "amulet at the throat",
+        "signature": {"hair_color": "gray-streaked dark hair", "hair_length": "very short",
+                      "facial_hair": "goatee", "eye_color": "gray"},
+        "physique": {"body_type": "lean", "height": "tall", "skin_tone": "fair"},
+    },
+    "Star-Lord": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "costume": "a long weathered red leather coat over a grey jacket, and a retro "
+                   "metal helmet with glowing orange eyes",
+        "signature": {"hair_color": "dark blonde", "hair_length": "very short",
+                      "facial_hair": "stubble", "eye_color": "bright blue"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+    },
+    "Loki": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "costume": "green and black layered armor with gold accents, a long flowing green "
+                   "cape, and a tall golden helmet with two long curving horns",
+        "signature": {"hair_color": "jet black", "hair_length": "jaw length",
+                      "hair_style": "slicked back", "eye_color": "green"},
+        "physique": {"body_type": "lean", "height": "tall", "skin_tone": "pale"},
+    },
+    "Thanos": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "costume": "gold and blue armored battle plate, blue greaves, and the golden "
+                   "Infinity Gauntlet, with all-over deeply ridged purple body paint",
+        "physique": {"body_type": "athletic", "height": "very tall"},
+    },
+    "Venom": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a hulking glossy pitch-black symbiote bodysuit with huge jagged white "
+                   "eye patches, a white spider emblem across the chest, and clawed hands",
+        "physique": {"body_type": "athletic", "height": "very tall"},
+    },
+    "Daredevil": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "deep red textured leather armor from head to toe, a small mask with "
+                   "two short devil horns, and a double-D emblem on the chest",
+        "physique": {"body_type": "lean", "height": "average height"},
+    },
+    "Punisher": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "costume": "a black long-sleeve shirt with a large stylized white skull spanning "
+                   "the chest, a tactical vest with ammo, and fingerless gloves",
+        "signature": {"hair_color": "dark brown", "hair_length": "very short",
+                      "facial_hair": "stubble", "eye_color": "gray"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+    },
+    "Magneto": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "costume": "a deep crimson armored bodysuit with purple gloves and boots, a "
+                   "purple flowing cape, and a tall purple crested helmet",
+        "signature": {"hair_color": "white", "hair_length": "very short",
+                      "eye_color": "blue-gray"},
+        "physique": {"body_type": "lean", "height": "tall", "skin_tone": "fair"},
+    },
+    "Doctor Doom": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a riveted steel mask with narrow eye slits, a hooded green cloak over "
+                   "silver metallic plate armor, a wide brown belt, and gauntlets",
+        "physique": {"body_type": "athletic", "height": "tall"},
+    },
+    "Gambit": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "costume": "a long brown trench coat over pink and blue armor with a chest sash",
+        "signature": {"hair_color": "auburn", "hair_length": "shoulder length",
+                      "hair_style": "worn down"},
+        "physique": {"body_type": "lean", "height": "tall", "skin_tone": "fair"},
+    },
+    "Nightcrawler": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "costume": "a red and black bodysuit, with all-over velvety indigo-blue body "
+                   "paint, pointed ears, and a long spaded tail",
+        "signature": {"hair_color": "jet black", "hair_length": "very short"},
+        "physique": {"body_type": "lean", "height": "average height"},
+    },
+    "Silver Surfer": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a seamless mirror-chrome silver bodysuit with all-over reflective "
+                   "silver body paint and blank silver eyes",
+        "physique": {"body_type": "lean", "height": "tall"},
+    },
+    "Winter Soldier": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "costume": "a black tactical vest with straps over dark combat gear, and a "
+                   "gleaming silver metal left arm bearing a red star",
+        "signature": {"hair_color": "dark brown", "hair_length": "jaw length",
+                      "facial_hair": "stubble", "eye_color": "bright blue"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+    },
+    "Ghost Rider": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a black studded leather jacket with chains, with a bare flaming skull "
+                   "wreathed in orange fire for a head",
+        "physique": {"body_type": "lean", "height": "tall"},
+    },
+    "Blade": {
+        "franchise": "Marvel",
+        "gender": "Male",
+        "costume": "an ankle-length black leather trench coat over black armor, and "
+                   "wraparound sunglasses",
+        "signature": {"hair_color": "jet black", "hair_length": "buzzed very short",
+                      "facial_hair": "stubble", "eye_color": "dark brown"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "dark brown"},
+    },
+
+    # --- DC (male) --------------------------------------------------------
+    "Superman": {
+        "franchise": "DC",
+        "gender": "Male",
+        "costume": "a skintight blue bodysuit with a large red and yellow diamond S shield "
+                   "on the chest, a red cape, red briefs, red boots, a golden belt, and a "
+                   "single curl of hair falling on the forehead",
+        "signature": {"hair_color": "jet black", "hair_length": "very short",
+                      "eye_color": "bright blue"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+    },
+    "Batman": {
+        "franchise": "DC",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a dark grey armored bodysuit with a black bat emblem across the chest, "
+                   "a long scalloped black cape, a yellow utility belt, black gauntlets "
+                   "with fin blades, and a black cowl with pointed bat ears",
+        "physique": {"body_type": "athletic", "height": "tall"},
+    },
+    "Bruce Wayne": {
+        "franchise": "DC",
+        "gender": "Male",
+        "costume": "an immaculately tailored charcoal three-piece suit, a crisp white "
+                   "shirt, a silk tie, and a gold watch",
+        "signature": {"hair_color": "jet black", "hair_length": "very short",
+                      "hair_style": "slicked back", "eye_color": "bright blue"},
+        "physique": {"body_type": "fit", "height": "tall", "skin_tone": "fair"},
+    },
+    "The Flash": {
+        "franchise": "DC",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a full red bodysuit with a golden lightning-bolt emblem in a white "
+                   "circle on the chest, a red cowl with small golden wing bolts at the "
+                   "ears, and golden boots",
+        "physique": {"body_type": "lean", "height": "average height"},
+    },
+    "Green Lantern": {
+        "franchise": "DC",
+        "gender": "Male",
+        "costume": "a black bodysuit with a bright green torso and shoulders, a green "
+                   "circular lantern emblem on the chest, a green domino mask, green "
+                   "gloves and boots, and a glowing green power ring",
+        "signature": {"hair_color": "dark brown", "hair_length": "very short",
+                      "eye_color": "green"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+    },
+    "Aquaman": {
+        "franchise": "DC",
+        "gender": "Male",
+        "costume": "a golden-orange scaled chainmail shirt, green scaled leggings, and "
+                   "golden gauntlets",
+        "signature": {"hair_color": "golden blonde", "hair_length": "long",
+                      "facial_hair": "short beard", "eye_color": "green"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "tan"},
+    },
+    "Green Arrow": {
+        "franchise": "DC",
+        "gender": "Male",
+        "costume": "a dark forest-green hooded leather suit, a green domino mask, and a "
+                   "quiver of arrows",
+        "signature": {"hair_color": "golden blonde", "hair_length": "very short",
+                      "facial_hair": "van dyke", "eye_color": "green"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+    },
+    "Cyborg": {
+        "franchise": "DC",
+        "gender": "Male",
+        "costume": "one side a human face, the rest gleaming silver and black robotic "
+                   "plating with a glowing eye and an arm-mounted sonic cannon",
+        "physique": {"body_type": "athletic", "height": "tall"},
+    },
+    "Nightwing": {
+        "franchise": "DC",
+        "gender": "Male",
+        "costume": "a black bodysuit with a bright blue bird symbol sweeping across the "
+                   "chest and onto the arms, and a black domino mask",
+        "signature": {"hair_color": "jet black", "hair_length": "jaw length",
+                      "hair_style": "slicked back", "eye_color": "bright blue"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+    },
+    "Shazam": {
+        "franchise": "DC",
+        "gender": "Male",
+        "costume": "a red bodysuit with a golden lightning-bolt emblem on the chest, a "
+                   "short white half-cape with gold trim, a golden sash, and golden boots",
+        "signature": {"hair_color": "jet black", "hair_length": "very short",
+                      "eye_color": "bright blue"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+    },
+    "Joker": {
+        "franchise": "DC",
+        "gender": "Male",
+        "costume": "a purple tailcoat suit with a green vest and a yellow shirt, all-over "
+                   "chalk-white skin body paint, a wide carved red grin, and slicked-back "
+                   "bright green hair",
+        "signature": {"hair_color": "emerald green", "hair_length": "jaw length",
+                      "hair_style": "slicked back"},
+        "physique": {"body_type": "lean", "height": "tall"},
+    },
+    "Bane": {
+        "franchise": "DC",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a black luchador mask covering the whole head, a tactical vest, broad "
+                   "bare muscular arms, and a thick green venom tube feeding into the back "
+                   "of the skull",
+        "physique": {"body_type": "athletic", "height": "very tall"},
+    },
+    "Deathstroke": {
+        "franchise": "DC",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a blue and grey armored tactical suit, a mask split half orange and "
+                   "half black with a single eye slit, bandoliers, and a sword sheathed "
+                   "on the back",
+        "physique": {"body_type": "athletic", "height": "tall"},
+    },
+    "Black Adam": {
+        "franchise": "DC",
+        "gender": "Male",
+        "costume": "a black bodysuit with a golden lightning-bolt emblem on the chest, a "
+                   "golden hood and sash, a flowing black cape, and golden bracers",
+        "signature": {"hair_color": "jet black", "hair_length": "very short",
+                      "eye_color": "dark brown"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+    },
+    "Martian Manhunter": {
+        "franchise": "DC",
+        "gender": "Male",
+        "costume": "a blue cape held by crossed straps over a bare chest, blue trunks, and "
+                   "blue boots, with all-over smooth green body paint and a bald green head",
+        "physique": {"body_type": "athletic", "height": "very tall"},
+    },
+
+    # --- Star Wars (male) -------------------------------------------------
+    "Luke Skywalker": {
+        "franchise": "Star Wars",
+        "gender": "Male",
+        "costume": "a black Jedi tunic with a wrapped front and a wide belt, and a single "
+                   "black glove",
+        "signature": {"hair_color": "dirty blonde", "hair_length": "very short",
+                      "eye_color": "bright blue"},
+        "physique": {"body_type": "lean", "height": "average height", "skin_tone": "fair"},
+    },
+    "Han Solo": {
+        "franchise": "Star Wars",
+        "gender": "Male",
+        "costume": "a white shirt under a black vest, dark trousers with a red side "
+                   "stripe, and a low-slung empty blaster holster on the thigh",
+        "signature": {"hair_color": "dark brown", "hair_length": "very short",
+                      "eye_color": "dark brown"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+    },
+    "Darth Vader": {
+        "franchise": "Star Wars",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a glossy black domed helmet and skull-like mask with triangular eye "
+                   "lenses, a black ribbed chest control panel, a wide belt box, and a "
+                   "flowing black cape",
+        "physique": {"body_type": "athletic", "height": "very tall"},
+    },
+    "Obi-Wan Kenobi": {
+        "franchise": "Star Wars",
+        "gender": "Male",
+        "costume": "layered cream and brown Jedi robes with a hooded cloak",
+        "signature": {"hair_color": "auburn", "hair_length": "jaw length",
+                      "facial_hair": "full beard", "eye_color": "bright blue"},
+        "physique": {"body_type": "lean", "height": "average height", "skin_tone": "fair"},
+    },
+    "Yoda": {
+        "franchise": "Star Wars",
+        "gender": "Male",
+        "costume": "a simple brown Jedi robe, with green wrinkled skin, very large pointed "
+                   "ears, and sparse white hair",
+        "signature": {"eye_color": "green"},
+        "physique": {"body_type": "slim", "height": "very petite"},
+    },
+    "Mace Windu": {
+        "franchise": "Star Wars",
+        "gender": "Male",
+        "costume": "dark brown layered Jedi robes with a cloak",
+        "signature": {"hair_length": "buzzed very short", "facial_hair": "clean shaven",
+                      "eye_color": "dark brown"},
+        "physique": {"body_type": "lean", "height": "tall", "skin_tone": "dark brown"},
+    },
+    "Anakin Skywalker": {
+        "franchise": "Star Wars",
+        "gender": "Male",
+        "costume": "a dark Jedi tunic and tabards with a single leather glove on the right "
+                   "hand, and a scar across the right brow",
+        "signature": {"hair_color": "dark brown", "hair_length": "shoulder length",
+                      "hair_texture": "wavy", "eye_color": "bright blue"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+    },
+    "Kylo Ren": {
+        "franchise": "Star Wars",
+        "gender": "Male",
+        "costume": "a black ribbed tunic with a layered hooded cape, and a scar down one "
+                   "cheek",
+        "signature": {"hair_color": "jet black", "hair_length": "jaw length",
+                      "hair_texture": "wavy", "eye_color": "dark brown"},
+        "physique": {"body_type": "lean", "height": "tall", "skin_tone": "fair"},
+    },
+    "Boba Fett": {
+        "franchise": "Star Wars",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "weathered green and rust Mandalorian armor with battle dents, a green "
+                   "T-visor helmet with a side rangefinder, a jetpack, and a braided "
+                   "trophy cape on one shoulder",
+        "physique": {"body_type": "athletic", "height": "average height"},
+    },
+    "The Mandalorian": {
+        "franchise": "Star Wars",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "full polished silver beskar plate armor over a flight suit, a smooth "
+                   "silver T-visor helmet, a jetpack, and a brown half-cape",
+        "physique": {"body_type": "athletic", "height": "average height"},
+    },
+    "Darth Maul": {
+        "franchise": "Star Wars",
+        "gender": "Male",
+        "costume": "black hooded robes, with all-over blood-red body paint patterned with "
+                   "intricate black tattoos and a crown of short black horns ringing the "
+                   "head",
+        "physique": {"body_type": "lean", "height": "average height"},
+    },
+    "Chewbacca": {
+        "franchise": "Star Wars",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a single bandolier strap of silver ammo across the chest, with "
+                   "all-over long shaggy brown fur over the whole body",
+        "physique": {"body_type": "athletic", "height": "very tall"},
+    },
+    "Emperor Palpatine": {
+        "franchise": "Star Wars",
+        "gender": "Male",
+        "costume": "heavy black hooded robes, with pale corrupted wrinkled skin",
+        "signature": {"hair_color": "silver", "hair_length": "ear length"},
+        "physique": {"body_type": "slim", "height": "short", "skin_tone": "very pale"},
+    },
+
+    # --- Star Trek (male) -------------------------------------------------
+    "Mr. Spock": {
+        "franchise": "Star Trek",
+        "gender": "Male",
+        "costume": "a blue Starfleet science tunic with an insignia, black trousers, black "
+                   "boots, pointed Vulcan ears, and sharply upswept eyebrows",
+        "signature": {"hair_color": "jet black", "hair_length": "very short",
+                      "hair_texture": "sleek straight", "eye_color": "dark brown"},
+        "physique": {"body_type": "lean", "height": "tall", "skin_tone": "fair"},
+    },
+    "Captain Kirk": {
+        "franchise": "Star Trek",
+        "gender": "Male",
+        "costume": "a gold Starfleet command tunic with a starburst insignia, black "
+                   "trousers, and black boots",
+        "signature": {"hair_color": "medium brown", "hair_length": "very short",
+                      "eye_color": "hazel"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+    },
+    "Captain Picard": {
+        "franchise": "Star Trek",
+        "gender": "Male",
+        "costume": "a red and black Starfleet uniform with rank pips on the collar",
+        "signature": {"hair_length": "buzzed very short", "facial_hair": "clean shaven",
+                      "eye_color": "bright blue"},
+        "physique": {"body_type": "fit", "height": "tall", "skin_tone": "fair"},
+    },
+    "Data": {
+        "franchise": "Star Trek",
+        "gender": "Male",
+        "costume": "a gold and black Starfleet uniform, with pale golden synthetic skin "
+                   "and golden eyes",
+        "signature": {"hair_color": "jet black", "hair_length": "very short",
+                      "hair_style": "slicked back", "eye_color": "amber"},
+        "physique": {"body_type": "athletic", "height": "average height"},
+    },
+    "Worf": {
+        "franchise": "Star Trek",
+        "gender": "Male",
+        "costume": "a Starfleet uniform crossed with a metallic Klingon baldric sash, and "
+                   "a pronounced ridged Klingon forehead",
+        "signature": {"hair_color": "jet black", "hair_length": "long",
+                      "eye_color": "dark brown"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "brown"},
+    },
+
+    # --- Final Fantasy (male) ---------------------------------------------
+    "Cloud Strife": {
+        "franchise": "Final Fantasy",
+        "gender": "Male",
+        "costume": "a sleeveless black turtleneck with a single shoulder pauldron and a "
+                   "leather glove",
+        "signature": {"hair_color": "golden blonde", "hair_length": "very short",
+                      "hair_style": "windswept", "eye_color": "bright blue"},
+        "physique": {"body_type": "lean", "height": "average height", "skin_tone": "fair"},
+    },
+    "Sephiroth": {
+        "franchise": "Final Fantasy",
+        "gender": "Male",
+        "costume": "a long black leather coat with armored shoulder pauldrons worn over a "
+                   "bare chest",
+        "signature": {"hair_color": "silver", "hair_length": "very long",
+                      "hair_texture": "pin straight", "eye_color": "bright green"},
+        "physique": {"body_type": "lean", "height": "tall", "skin_tone": "pale"},
+    },
+    "Squall": {
+        "franchise": "Final Fantasy",
+        "gender": "Male",
+        "costume": "a black leather jacket with a white fur collar, and a scar slanting "
+                   "across the brow and nose",
+        "signature": {"hair_color": "dark brown", "hair_length": "very short",
+                      "eye_color": "deep blue"},
+        "physique": {"body_type": "lean", "height": "average height", "skin_tone": "fair"},
+    },
+    "Tidus": {
+        "franchise": "Final Fantasy",
+        "gender": "Male",
+        "costume": "a yellow and black sleeveless top with one long sleeve, overall-shorts "
+                   "with suspenders, and a single yellow glove",
+        "signature": {"hair_color": "dirty blonde", "hair_length": "very short",
+                      "hair_style": "windswept", "eye_color": "bright blue"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "tan"},
+    },
+    "Zidane": {
+        "franchise": "Final Fantasy",
+        "gender": "Male",
+        "costume": "a white shirt under a blue vest, an orange tail-ring, and a long "
+                   "monkey tail",
+        "signature": {"hair_color": "golden blonde", "hair_length": "jaw length",
+                      "hair_style": "low ponytail", "eye_color": "bright blue"},
+        "physique": {"body_type": "lean", "height": "short", "skin_tone": "tan"},
+    },
+    "Vincent Valentine": {
+        "franchise": "Final Fantasy",
+        "gender": "Male",
+        "costume": "a red headband and a tattered red cloak with a high collar over dark "
+                   "leather, and a golden three-pointed clawed gauntlet",
+        "signature": {"hair_color": "jet black", "hair_length": "long"},
+        "physique": {"body_type": "lean", "height": "tall", "skin_tone": "pale"},
+    },
+    "Auron": {
+        "franchise": "Final Fantasy",
+        "gender": "Male",
+        "costume": "a high red coat worn off one shoulder with the sleeve hanging empty, "
+                   "small round sunglasses, and a jug at the belt",
+        "signature": {"hair_color": "gray-streaked dark hair", "hair_length": "shoulder length",
+                      "hair_style": "low ponytail", "facial_hair": "short beard"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+    },
+
+    # --- Street Fighter (male) --------------------------------------------
+    "Ryu": {
+        "franchise": "Street Fighter",
+        "gender": "Male",
+        "costume": "a white sleeveless karate gi with frayed cuffs and a black belt, a red "
+                   "headband, and red hand wraps, barefoot",
+        "signature": {"hair_color": "jet black", "hair_length": "very short",
+                      "eye_color": "dark brown"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+    },
+    "Ken Masters": {
+        "franchise": "Street Fighter",
+        "gender": "Male",
+        "costume": "a red sleeveless karate gi with a black belt and red hand wraps, "
+                   "barefoot",
+        "signature": {"hair_color": "golden blonde", "hair_length": "very short",
+                      "hair_style": "slicked back", "eye_color": "bright blue"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+    },
+    "Akuma": {
+        "franchise": "Street Fighter",
+        "gender": "Male",
+        "costume": "a dark torn karate gi worn off the shoulders, a large prayer-bead "
+                   "necklace, and the red kanji for heaven on the back, barefoot",
+        "signature": {"hair_color": "orange", "hair_length": "very short",
+                      "hair_style": "windswept"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "tan"},
+    },
+    "M. Bison": {
+        "franchise": "Street Fighter",
+        "gender": "Male",
+        "costume": "a red military uniform with broad shoulder pads, a black cape, a wide "
+                   "belt, and a peaked military cap with an emblem",
+        "physique": {"body_type": "athletic", "height": "tall"},
+    },
+    "Guile": {
+        "franchise": "Street Fighter",
+        "gender": "Male",
+        "costume": "green camouflage fatigue trousers, a green tank top, dog tags, red and "
+                   "black hand wraps, combat boots, and a tall blonde flat-top",
+        "signature": {"hair_color": "golden blonde", "hair_length": "very short",
+                      "eye_color": "bright blue"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+    },
+    "Blanka": {
+        "franchise": "Street Fighter",
+        "gender": "Male",
+        "costume": "torn brown shorts and ankle manacles, with all-over bright green skin "
+                   "body paint, wild orange hair and mane, and sharp teeth",
+        "physique": {"body_type": "athletic", "height": "average height"},
+    },
+    "Dhalsim": {
+        "franchise": "Street Fighter",
+        "gender": "Male",
+        "costume": "a torn orange loincloth, multiple skull necklaces, three painted dots "
+                   "on the forehead, and a bald head painted with white skull markings",
+        "signature": {"eye_color": "dark brown"},
+        "physique": {"body_type": "very slim", "height": "tall", "skin_tone": "dark brown"},
+    },
+    "Zangief": {
+        "franchise": "Street Fighter",
+        "gender": "Male",
+        "costume": "red wrestling briefs, red boots, brown hand wraps, a red mohawk, and a "
+                   "bare muscular scarred chest with thick chest hair",
+        "signature": {"hair_color": "bright red", "eye_color": "bright blue"},
+        "physique": {"body_type": "stocky", "height": "very tall", "skin_tone": "fair"},
+    },
+
+    # --- Mortal Kombat (male) ---------------------------------------------
+    "Scorpion": {
+        "franchise": "Mortal Kombat",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a yellow and black ninja uniform with a mask and a hood, ninja-rope "
+                   "wrappings, and a kunai spear on a chain",
+        "physique": {"body_type": "athletic", "height": "tall"},
+    },
+    "Sub-Zero": {
+        "franchise": "Mortal Kombat",
+        "gender": "Male",
+        "costume": "a blue and black ninja uniform with a mask over the lower face and a "
+                   "frosted chest emblem, with frost forming at the hands",
+        "signature": {"hair_color": "jet black", "hair_length": "very short",
+                      "eye_color": "ice blue"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+    },
+    "Raiden": {
+        "franchise": "Mortal Kombat",
+        "gender": "Male",
+        "costume": "a white robe and vest with a wide-brimmed conical straw hat, with blue "
+                   "lightning crackling across the body",
+        "signature": {"hair_color": "white", "hair_length": "long"},
+        "physique": {"body_type": "lean", "height": "tall", "skin_tone": "fair"},
+    },
+    "Liu Kang": {
+        "franchise": "Mortal Kombat",
+        "gender": "Male",
+        "costume": "black martial-arts trousers, a red headband, hand wraps, and a bare "
+                   "muscular chest, with fire at the fists",
+        "signature": {"hair_color": "jet black", "hair_length": "very short",
+                      "eye_color": "dark brown"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+    },
+    "Kung Lao": {
+        "franchise": "Mortal Kombat",
+        "gender": "Male",
+        "costume": "blue and black warrior garb with a bare chest, and a wide black hat "
+                   "rimmed with a razor steel blade",
+        "signature": {"hair_length": "buzzed very short", "eye_color": "dark brown"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+    },
+    "Johnny Cage": {
+        "franchise": "Mortal Kombat",
+        "gender": "Male",
+        "costume": "a black sleeveless tank top, fingerless gloves, dark sunglasses, and "
+                   "martial-arts trousers",
+        "signature": {"hair_color": "dark brown", "hair_length": "very short",
+                      "hair_style": "slicked back", "eye_color": "bright blue"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+    },
+    "Kano": {
+        "franchise": "Mortal Kombat",
+        "gender": "Male",
+        "costume": "a black sleeveless outfit, a metal plate bolted over the right half of "
+                   "the face with a glowing red laser eye, and a curved knife sheath",
+        "signature": {"hair_color": "dark brown", "hair_length": "very short",
+                      "facial_hair": "stubble"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+    },
+    "Shao Kahn": {
+        "franchise": "Mortal Kombat",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "ornate armor with huge spiked shoulder pauldrons over a bare muscular "
+                   "chest, and a horned skull-faced helmet",
+        "physique": {"body_type": "athletic", "height": "very tall"},
+    },
+    "Reptile": {
+        "franchise": "Mortal Kombat",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a green and black ninja uniform with a mask, with green scaled skin "
+                   "body paint and clawed hands",
+        "physique": {"body_type": "lean", "height": "average height"},
+    },
+    "Baraka": {
+        "franchise": "Mortal Kombat",
+        "gender": "Male",
+        "costume": "leather warrior garb, a bald head, a wide mouth of jagged sharp teeth, "
+                   "and long retractable blades extending from both forearms",
+        "signature": {"eye_color": "nearly black"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+    },
+
+    # --- Anime (male) -----------------------------------------------------
+    "Goku": {
+        "franchise": "Dragon Ball",
+        "gender": "Male",
+        "costume": "an orange martial-arts gi with a blue undershirt and sash, and blue "
+                   "wristbands and boots",
+        "signature": {"hair_color": "jet black", "hair_length": "very short",
+                      "hair_style": "windswept", "eye_color": "dark brown"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+    },
+    "Vegeta": {
+        "franchise": "Dragon Ball",
+        "gender": "Male",
+        "costume": "a blue bodysuit under white and yellow Saiyan armor, with white gloves "
+                   "and boots",
+        "signature": {"hair_color": "jet black", "hair_length": "very short",
+                      "hair_style": "windswept", "eye_color": "dark brown"},
+        "physique": {"body_type": "athletic", "height": "short", "skin_tone": "fair"},
+    },
+    "Piccolo": {
+        "franchise": "Dragon Ball",
+        "gender": "Male",
+        "costume": "a white turban and a white cape over shoulder pads, a purple gi with a "
+                   "blue sash, green skin, pointed ears, and two head antennae",
+        "signature": {"eye_color": "nearly black"},
+        "physique": {"body_type": "athletic", "height": "tall"},
+    },
+    "Naruto Uzumaki": {
+        "franchise": "Naruto",
+        "gender": "Male",
+        "costume": "an orange and black tracksuit, a metal-plate forehead protector "
+                   "headband, and three whisker marks on each cheek",
+        "signature": {"hair_color": "golden blonde", "hair_length": "very short",
+                      "hair_style": "windswept", "eye_color": "bright blue"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+    },
+    "Sasuke Uchiha": {
+        "franchise": "Naruto",
+        "gender": "Male",
+        "costume": "a dark high-collared shirt with a rope belt, and a sword sheathed at "
+                   "the lower back",
+        "signature": {"hair_color": "near black", "hair_length": "jaw length",
+                      "eye_color": "dark brown"},
+        "physique": {"body_type": "lean", "height": "average height", "skin_tone": "fair"},
+    },
+    "Kakashi Hatake": {
+        "franchise": "Naruto",
+        "gender": "Male",
+        "costume": "a green flak vest over dark blues, a dark cloth mask over the lower "
+                   "face, and a slanted forehead protector covering one eye",
+        "signature": {"hair_color": "silver", "hair_length": "very short",
+                      "hair_style": "windswept", "eye_color": "dark gray"},
+        "physique": {"body_type": "lean", "height": "tall", "skin_tone": "fair"},
+    },
+    "Monkey D. Luffy": {
+        "franchise": "One Piece",
+        "gender": "Male",
+        "costume": "an open red vest over a bare chest, blue knee-shorts, sandals, a "
+                   "yellow straw hat, and a scar under the left eye",
+        "signature": {"hair_color": "jet black", "hair_length": "very short",
+                      "eye_color": "dark brown"},
+        "physique": {"body_type": "lean", "height": "average height", "skin_tone": "tan"},
+    },
+    "Roronoa Zoro": {
+        "franchise": "One Piece",
+        "gender": "Male",
+        "costume": "a green haramaki sash holding three sheathed swords at the hip, a "
+                   "black bandana, gold earrings, and a long vertical scar over the left eye",
+        "signature": {"hair_color": "emerald green", "hair_length": "very short",
+                      "eye_color": "dark brown"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "tan"},
+    },
+    "All Might": {
+        "franchise": "My Hero Academia",
+        "gender": "Male",
+        "costume": "a skintight blue costume with bold red and white stripes meeting at a "
+                   "V, white gloves, and a permanent wide grin",
+        "signature": {"hair_color": "golden blonde", "hair_length": "very short",
+                      "hair_style": "windswept", "eye_color": "bright blue"},
+        "physique": {"body_type": "athletic", "height": "very tall", "skin_tone": "fair"},
+    },
+    "Deku": {
+        "franchise": "My Hero Academia",
+        "gender": "Male",
+        "costume": "a green bodysuit with a white-ribbed pattern, a hood with two tall "
+                   "rabbit-like ears, a red belt, metal arm braces, and freckles",
+        "signature": {"hair_color": "emerald green", "hair_length": "very short",
+                      "hair_texture": "curly", "eye_color": "green"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+    },
+    "Bakugo": {
+        "franchise": "My Hero Academia",
+        "gender": "Male",
+        "costume": "a black sleeveless costume with an orange X-strap and a high collar, "
+                   "and enormous grenade-shaped gauntlets",
+        "signature": {"hair_color": "dirty blonde", "hair_length": "very short",
+                      "hair_style": "windswept"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+    },
+    "Edward Elric": {
+        "franchise": "Fullmetal Alchemist",
+        "gender": "Male",
+        "costume": "a red hooded coat over a black jacket and trousers, white gloves, and "
+                   "a steel automail right arm",
+        "signature": {"hair_color": "golden blonde", "hair_length": "shoulder length",
+                      "hair_style": "side braid", "eye_color": "amber"},
+        "physique": {"body_type": "lean", "height": "short", "skin_tone": "fair"},
+    },
+    "Levi Ackerman": {
+        "franchise": "Attack on Titan",
+        "gender": "Male",
+        "costume": "a brown Survey Corps jacket with the wings-of-freedom crest, a green "
+                   "hooded cloak, and a body harness with handheld blades on ODM gear",
+        "signature": {"hair_color": "jet black", "hair_length": "very short",
+                      "hair_style": "blunt bangs", "eye_color": "dark gray"},
+        "physique": {"body_type": "lean", "height": "short", "skin_tone": "fair"},
+    },
+    "Eren Yeager": {
+        "franchise": "Attack on Titan",
+        "gender": "Male",
+        "costume": "a brown Survey Corps jacket and straps over a white shirt, a green "
+                   "hooded cloak, and an ODM-gear harness",
+        "signature": {"hair_color": "dark brown", "hair_length": "jaw length",
+                      "eye_color": "green"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+    },
+    "Saitama": {
+        "franchise": "One Punch Man",
+        "gender": "Male",
+        "costume": "a yellow jumpsuit with a zip collar, a white cape, red gloves, red "
+                   "boots, a black belt, and a completely bald shiny head",
+        "physique": {"body_type": "lean", "height": "average height", "skin_tone": "fair"},
+    },
+
+    # --- Nintendo (male) --------------------------------------------------
+    "Mario": {
+        "franchise": "Nintendo",
+        "gender": "Male",
+        "costume": "blue overalls over a red shirt, white gloves, brown boots, a red cap "
+                   "with a white circle and red M, and a thick brown mustache",
+        "signature": {"hair_color": "dark brown", "hair_length": "very short",
+                      "facial_hair": "mustache", "eye_color": "bright blue"},
+        "physique": {"body_type": "stocky", "height": "short", "skin_tone": "fair"},
+    },
+    "Luigi": {
+        "franchise": "Nintendo",
+        "gender": "Male",
+        "costume": "blue overalls over a green shirt, white gloves, brown boots, a green "
+                   "cap with a white circle and green L, and a thin brown mustache",
+        "signature": {"hair_color": "dark brown", "hair_length": "very short",
+                      "facial_hair": "mustache", "eye_color": "bright blue"},
+        "physique": {"body_type": "lean", "height": "tall", "skin_tone": "fair"},
+    },
+    "Link": {
+        "franchise": "Nintendo",
+        "gender": "Male",
+        "costume": "a green belted tunic over a white undershirt, a long green pointed "
+                   "cap, brown boots and gauntlets, pointed elf ears, and a kite shield "
+                   "on the back",
+        "signature": {"hair_color": "golden blonde", "hair_length": "very short",
+                      "eye_color": "bright blue"},
+        "physique": {"body_type": "lean", "height": "average height", "skin_tone": "fair"},
+    },
+    "Ganondorf": {
+        "franchise": "Nintendo",
+        "gender": "Male",
+        "costume": "a black and gold tunic with armor and a jewel on the forehead, with "
+                   "long flame-red hair pulled back and dark green-grey skin",
+        "signature": {"hair_color": "bright red", "hair_length": "long",
+                      "hair_style": "low ponytail", "eye_color": "amber"},
+        "physique": {"body_type": "athletic", "height": "very tall"},
+    },
+
+    # --- Lord of the Rings (male) -----------------------------------------
+    "Aragorn": {
+        "franchise": "Lord of the Rings",
+        "gender": "Male",
+        "costume": "worn brown ranger leathers and a hooded travel cloak",
+        "signature": {"hair_color": "dark brown", "hair_length": "long",
+                      "facial_hair": "short beard", "eye_color": "gray"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+    },
+    "Legolas": {
+        "franchise": "Lord of the Rings",
+        "gender": "Male",
+        "costume": "a green and brown elven tunic, pointed elf ears, and a quiver on the "
+                   "back",
+        "signature": {"hair_color": "light blonde", "hair_length": "long",
+                      "hair_texture": "pin straight", "eye_color": "bright blue"},
+        "physique": {"body_type": "lean", "height": "tall", "skin_tone": "fair"},
+    },
+    "Gandalf": {
+        "franchise": "Lord of the Rings",
+        "gender": "Male",
+        "costume": "layered grey robes and a tall pointed grey hat",
+        "signature": {"hair_color": "silver", "hair_length": "very long",
+                      "facial_hair": "full beard", "eye_color": "blue-gray"},
+        "physique": {"body_type": "average", "height": "tall", "skin_tone": "fair"},
+    },
+    "Gimli": {
+        "franchise": "Lord of the Rings",
+        "gender": "Male",
+        "costume": "a horned and riveted iron helmet, and layered dwarven armor",
+        "signature": {"hair_color": "auburn", "hair_length": "shoulder length",
+                      "facial_hair": "full beard", "eye_color": "dark brown"},
+        "physique": {"body_type": "stocky", "height": "short", "skin_tone": "fair"},
+    },
+    "Frodo Baggins": {
+        "franchise": "Lord of the Rings",
+        "gender": "Male",
+        "costume": "a tan waistcoat over a white shirt with a green travel cloak, "
+                   "oversized bare hairy feet, and a glowing ring on a chain",
+        "signature": {"hair_color": "dark brown", "hair_length": "ear length",
+                      "hair_texture": "curly", "eye_color": "bright blue"},
+        "physique": {"body_type": "slim", "height": "petite", "skin_tone": "fair"},
+    },
+
+    # --- More games / movies (male) ---------------------------------------
+    "Geralt of Rivia": {
+        "franchise": "The Witcher",
+        "gender": "Male",
+        "costume": "dark studded-leather armor with a medallion, and two swords crossed on "
+                   "the back",
+        "signature": {"hair_color": "white", "hair_length": "shoulder length",
+                      "hair_style": "low ponytail", "facial_hair": "stubble",
+                      "eye_color": "amber"},
+        "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+    },
+    "Kratos": {
+        "franchise": "God of War",
+        "gender": "Male",
+        "costume": "a leather harness and bracers over a bare chest, with ash-grey pale "
+                   "skin body paint and a bold red tattoo across the torso and one eye",
+        "signature": {"hair_length": "buzzed very short", "facial_hair": "full beard",
+                      "eye_color": "dark brown"},
+        "physique": {"body_type": "athletic", "height": "very tall"},
+    },
+    "Master Chief": {
+        "franchise": "Halo",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "full matte olive-green Mjolnir power armor, a helmet with a "
+                   "golden-orange reflective visor, and heavy plated shoulders and gauntlets",
+        "physique": {"body_type": "athletic", "height": "very tall"},
+    },
+    "Solid Snake": {
+        "franchise": "Metal Gear",
+        "gender": "Male",
+        "costume": "a grey skintight sneaking suit with knee pads, a bandana, and a "
+                   "holstered pistol",
+        "signature": {"hair_color": "dark brown", "hair_length": "jaw length",
+                      "facial_hair": "stubble", "eye_color": "bright blue"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+    },
+    "Doctor Manhattan": {
+        "franchise": "Watchmen",
+        "gender": "Male",
+        "costume": "a hydrogen-atom symbol glowing on the forehead, with all-over glowing "
+                   "blue body paint, a bald head, and blank white eyes",
+        "physique": {"body_type": "lean", "height": "tall"},
+    },
+    "Rorschach": {
+        "franchise": "Watchmen",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a belted tan trench coat, a brown fedora, fingerless gloves, and a "
+                   "white full-face mask covered in shifting black inkblot patterns",
+        "physique": {"body_type": "average", "height": "average height"},
+    },
+    "Optimus Prime": {
+        "franchise": "Transformers",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "towering red and blue metallic armor plating with a windshield chest, "
+                   "two head crest antennae, a faceplate, and glowing blue eyes",
+        "physique": {"body_type": "athletic", "height": "very tall"},
+    },
+    "Spawn": {
+        "franchise": "Image",
+        "gender": "Male",
+        "covers_face": True,
+        "costume": "a living pitch-black suit with a white spider-like chest symbol, an "
+                   "enormous tattered red cape, and wrapped chains and spikes",
+        "physique": {"body_type": "athletic", "height": "tall"},
+    },
+    "Jack Sparrow": {
+        "franchise": "Pirates of the Caribbean",
+        "gender": "Male",
+        "costume": "a red bandana under a brown tricorn hat, a long ragged coat over "
+                   "layered sashes, gold rings, and a braided forked beard",
+        "signature": {"hair_color": "dark brown", "hair_length": "shoulder length",
+                      "hair_style": "locs", "facial_hair": "goatee", "eye_color": "dark brown"},
+        "physique": {"body_type": "lean", "height": "average height", "skin_tone": "tan"},
+    },
+    "Indiana Jones": {
+        "franchise": "Movie",
+        "gender": "Male",
+        "costume": "a brown felt fedora, a worn leather jacket over a khaki shirt, a "
+                   "coiled bullwhip on the belt, and a satchel",
+        "signature": {"hair_color": "dark brown", "hair_length": "very short",
+                      "facial_hair": "stubble", "eye_color": "dark brown"},
+        "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "tan"},
     },
 }
 

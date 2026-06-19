@@ -60,6 +60,18 @@ _HIDDEN_FIELDS: frozenset[str] = frozenset({"outfit_description"})
 #: connected Cosplayer node's ``_meta`` through the parsed-archetype dict.
 _COSPLAY_LABEL_KEY = "__cosplay_label__"
 
+#: Reserved key carrying a cosplayer's ``covers_face`` flag (see below) through
+#: the parsed-archetype dict, the same way the cosplay label travels.
+_COVERS_FACE_KEY = "__covers_face__"
+
+#: Field groups suppressed when a cosplayer sets ``covers_face`` — a full mask /
+#: helmet / featureless head hides the randomized face, hair and makeup, so
+#: describing them would only fight the costume at render time. Body and
+#: demographics stay (the person under the mask is still a real body).
+_CONCEALED_FACE_GROUPS: frozenset[str] = frozenset({"Face", "Hair", "Makeup"})
+#: Individual head-worn fields (outside the above groups) a full mask also hides.
+_CONCEALED_FACE_FIELDS: frozenset[str] = frozenset({"earrings", "piercings"})
+
 #: Control fields: read from their toggle, never randomized, never described.
 _CONTROL_FIELDS: frozenset[str] = frozenset(
     name for name, meta in FIELD_DEFINITIONS.items() if meta.get("control")
@@ -654,6 +666,7 @@ def generate_character(
     accessory_density: str = "Balanced",
     location_setting: str = "Any",
     cosplay_label: str | None = None,
+    covers_face: bool = False,
 ) -> tuple[str, str]:
     """Engine entry point. Returns ``(prose, json_output)``.
 
@@ -663,6 +676,9 @@ def generate_character(
 
     ``cosplay_label`` (e.g. ``"2B (NieR: Automata)"``), when set by a connected
     Cosplayer node, prefixes the prose and is recorded in the JSON ``_meta``.
+
+    ``covers_face`` (set by a full-mask cosplayer) drops the randomized face,
+    hair and makeup so only the costume's mask/helmet is described.
     """
     rng = random.Random(seed)
     # "None" locks the *absent* state (optional fields only); keep it. Only
@@ -712,6 +728,15 @@ def generate_character(
         for field in ("outfit_style", "footwear", "clothing_color", "clothing_pattern"):
             resolved.pop(field, None)
 
+    # A full mask / helmet hides the face: drop the now-irrelevant face, hair and
+    # makeup fields so neither prose nor JSON describes a face that contradicts
+    # the costume. Done after constraints so nothing downstream expects them.
+    if covers_face:
+        for field in list(resolved):
+            if (FIELD_DEFINITIONS.get(field, {}).get("group") in _CONCEALED_FACE_GROUPS
+                    or field in _CONCEALED_FACE_FIELDS):
+                resolved.pop(field, None)
+
     prose = _format_prose(resolved, gender, cosplay_label)
     json_output = _format_json(resolved, gender, hair_color_scope, wardrobe, cosplay_label)
     return prose, json_output
@@ -752,6 +777,8 @@ def _parse_archetype_json(raw: str) -> dict[str, str]:
                     f"{cosplay_of} ({franchise})"
                     if isinstance(franchise, str) and franchise else cosplay_of
                 )
+            if meta.get("covers_face"):
+                flat[_COVERS_FACE_KEY] = "1"
             continue
         if isinstance(value, dict):  # a group sub-dict
             for sub_key, sub_value in value.items():
@@ -884,6 +911,7 @@ if _COMFY_AVAILABLE:
 
             archetype = _parse_archetype_json(kwargs.get("archetype_json", ""))
             cosplay_label = archetype.pop(_COSPLAY_LABEL_KEY, None)
+            covers_face = bool(archetype.pop(_COVERS_FACE_KEY, None))
 
             # Gender: an explicit widget choice wins; "Any" defers to the archetype.
             widget_gender = kwargs.get("gender", "Any")
@@ -915,6 +943,6 @@ if _COMFY_AVAILABLE:
 
             prose, json_output = generate_character(
                 seed, gender, locked, hair_color_scope, wardrobe,
-                accessory_density, location_setting, cosplay_label,
+                accessory_density, location_setting, cosplay_label, covers_face,
             )
             return io.NodeOutput(prose, json_output)

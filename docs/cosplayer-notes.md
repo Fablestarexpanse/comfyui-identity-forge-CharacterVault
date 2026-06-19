@@ -15,6 +15,14 @@ everything else, so each run is a different person wearing the same costume.
 - **Costume only** (default): costume + signature; body, face, ethnicity randomize.
 - **Full character**: also locks the physique for a faithful look.
 
+An entry may set **`covers_face: True`** when the head is fully masked/helmeted
+(Spider-Man, a Mandalorian helmet, a ninja hood, a featureless chrome head). The
+Cosplayer node passes this through its `_meta`, and IdentityForge then drops the
+randomized **Face / Hair / Makeup** fields (plus earrings/piercings) from both the
+prose and JSON — so a random face never gets described fighting the mask. Leave it
+off whenever the face is visible (an open cowl, a domino mask, a body-painted but
+visible face like Hulk).
+
 ## Known limitations
 
 1. **Shared socket with Archetype.** Identity Forge has one preset input, so the
@@ -30,9 +38,11 @@ everything else, so each run is a different person wearing the same costume.
    no constraint tying those together; this predates the cosplayer node and
    affects locked body types generally.
 
-4. **Hair under headpieces.** For characters whose head is a prosthetic/headpiece
-   (e.g. montrals, helmets), hair still randomizes underneath in Costume-only mode.
-   Give the entry a `signature` hair value to tame it if it matters.
+4. **Hair under partial headpieces.** For characters whose head is *partly* covered
+   (montrals, a circlet, an open cowl) but whose face shows, hair still randomizes
+   underneath in Costume-only mode. Give the entry a `signature` hair value to tame
+   it, or — for a *fully* masked head — set `covers_face: True` (see above) to drop
+   the face/hair entirely.
 
 5. **Some iconic eye colours don't map.** The eye-colour field has no violet / red
    / yellow / pink options, so those characters' eyes randomize rather than being
@@ -56,4 +66,6 @@ The shipped set is a curated starter list and grows over time. Add your own
 without editing the source (survives `git pull`) via the `cosplayers` section of
 `user_options.json` — see `user_options.example.json`. A `gender: "Male"` entry is
 how the `Random — male` pick gets populated. Worn items only; leave held props and
-weapons out and add them by editing the prompt before rendering.
+weapons out and add them by editing the prompt before rendering. Add
+`"covers_face": true` for a fully masked head. Keep costume text and names plain
+ASCII (no em dashes / smart quotes) so text-to-image tokenizers don't mangle them.

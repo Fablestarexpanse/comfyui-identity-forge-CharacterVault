@@ -235,7 +235,8 @@ def apply_user_cosplayers(cosplayers: dict[str, dict], path: Path | None = None)
     """Merge the ``cosplayers`` section of ``user_options.json`` in place.
 
     Each entry needs a ``costume`` string (the only required key); ``franchise``
-    defaults to "", ``gender`` to "Female" (used only for Random scoping), and
+    defaults to "", ``gender`` to "Female" (used only for Random scoping),
+    ``covers_face`` to ``False`` (set ``True`` for a fully masked head), and
     ``signature`` / ``physique`` to empty maps. A user entry whose name matches a
     built-in overrides it. Returns the number of characters added.
     """
@@ -252,6 +253,7 @@ def apply_user_cosplayers(cosplayers: dict[str, dict], path: Path | None = None)
         cosplayers[name] = {
             "franchise": franchise if isinstance(franchise, str) else "",
             "gender": gender if gender in ("Female", "Male") else "Female",
+            "covers_face": bool(entry.get("covers_face", False)),
             "costume": costume,
             "signature": _clean_field_map(entry.get("signature")),
             "physique": _clean_field_map(entry.get("physique")),

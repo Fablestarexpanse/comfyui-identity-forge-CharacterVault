@@ -23,7 +23,8 @@ if str(ROOT) not in sys.path:
 
 from data.cosplayers import get_cosplayer_names
 from nodes.identity_forge import (
-    generate_character, _parse_archetype_json, _COSPLAY_LABEL_KEY, _CONTROL_FIELDS,
+    generate_character, _parse_archetype_json, _COSPLAY_LABEL_KEY, _COVERS_FACE_KEY,
+    _CONTROL_FIELDS,
 )
 from nodes.identity_forge_cosplayer import build_cosplayer_json
 
@@ -34,11 +35,14 @@ def render(character: str, gender: str, look_level: str, seed: int) -> tuple[str
     if not flat:
         raise SystemExit(f"No output for {character!r} — unknown name or empty Random pool.")
     label = flat.pop(_COSPLAY_LABEL_KEY, None)
+    covers_face = bool(flat.pop(_COVERS_FACE_KEY, None))
     # The IdentityForge node forwards the parsed _meta gender; mirror that so the
     # person defaults to the character's gender unless --male/--female overrides.
     resolved_gender = gender or flat.get("gender", "Any")
     locked = {k: v for k, v in flat.items() if k not in _CONTROL_FIELDS}
-    return generate_character(seed, resolved_gender, locked, cosplay_label=label)
+    return generate_character(
+        seed, resolved_gender, locked, cosplay_label=label, covers_face=covers_face
+    )
 
 
 def main(argv: list[str] | None = None) -> int:

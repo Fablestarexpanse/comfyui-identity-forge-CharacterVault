@@ -23,7 +23,7 @@ from nodes.identity_forge import (
     _CONTROL_FIELDS,
     _EXTRA_ABSENCE,
 )
-from nodes.identity_forge import _COSPLAY_LABEL_KEY
+from nodes.identity_forge import _COSPLAY_LABEL_KEY, _COVERS_FACE_KEY
 from nodes.identity_forge_archetype import build_archetype_json
 from nodes.identity_forge_cosplayer import build_cosplayer_json
 from data.templates import ARCHETYPES
@@ -350,9 +350,15 @@ class CosplayerTests(unittest.TestCase):
         name = json.loads(build_cosplayer_json("Random — female", 3))["_meta"]["cosplay_of"]
         self.assertEqual(COSPLAYERS[name]["gender"], "Female")
 
-    def test_random_empty_pool_returns_empty(self):
-        # No male-source characters in the starter set yet — must degrade gracefully.
-        self.assertEqual(build_cosplayer_json("Random — male", 0), "{}")
+    def test_random_male_scopes_to_male_sources(self):
+        name = json.loads(build_cosplayer_json("Random — male", 3))["_meta"]["cosplay_of"]
+        self.assertEqual(COSPLAYERS[name]["gender"], "Male")
+
+    def test_random_unknown_pool_returns_empty(self):
+        # A Random pick over an empty pool must still degrade gracefully to "{}".
+        from nodes.identity_forge_cosplayer import _resolve_character
+        import random
+        self.assertIsNone(_resolve_character("Random — nonexistent", random.Random(0)))
 
     def test_end_to_end_prose_has_cosplay_prefix(self):
         locked, label, _ = self._locked_and_label("2B")
@@ -380,6 +386,38 @@ class CosplayerTests(unittest.TestCase):
                 doc["Clothing"]["outfit_description"], COSPLAYERS["2B"]["costume"]
             )
             self.assertEqual(doc["Hair"]["hair_color"], "platinum blonde")
+
+    def test_covers_face_meta_flag(self):
+        # Masked character carries covers_face; an unmasked one does not.
+        self.assertTrue(json.loads(build_cosplayer_json("Spider-Man", 0))["_meta"]["covers_face"])
+        self.assertFalse(json.loads(build_cosplayer_json("2B", 0))["_meta"]["covers_face"])
+
+    def test_covers_face_suppresses_face_hair_and_makeup(self):
+        # A full-mask character: the randomized face/hair/makeup are dropped from
+        # both prose and JSON so only the costume (with its mask) is described.
+        flat = _parse_archetype_json(build_cosplayer_json("Spider-Man", 0))
+        covers = bool(flat.pop(_COVERS_FACE_KEY, None))
+        self.assertTrue(covers)
+        locked = {k: v for k, v in flat.items() if k not in _CONTROL_FIELDS}
+        for seed in range(10):
+            prose, js = generate_character(seed, "Male", locked, covers_face=covers)
+            doc = json.loads(js)
+            for group in ("Face", "Hair", "Makeup"):
+                self.assertNotIn(group, doc, f"{group} should be suppressed")
+            self.assertNotIn("His face", prose)
+            self.assertNotIn("His hair", prose)
+            # The costume (with the mask) is still present.
+            self.assertEqual(
+                doc["Clothing"]["outfit_description"], COSPLAYERS["Spider-Man"]["costume"]
+            )
+
+    def test_unmasked_character_keeps_face_and_hair(self):
+        # Without covers_face the face/hair are described as usual.
+        flat = _parse_archetype_json(build_cosplayer_json("Tony Stark", 0))
+        self.assertNotIn(_COVERS_FACE_KEY, flat)
+        locked = {k: v for k, v in flat.items() if k not in _CONTROL_FIELDS}
+        _, js = generate_character(1, "Male", locked, covers_face=False)
+        self.assertIn("Hair", json.loads(js))
 
     def test_all_cosplayer_fields_valid(self):
         valid = set(FIELD_DEFINITIONS)
