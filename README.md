@@ -28,19 +28,31 @@ Built on the ComfyUI **V3 API** (`comfy_api.latest`). Category:
 ---
 
 ## Showcase
-Main node - many more options are available than shown:
-<img width="1563" height="1515" alt="Screenshot 2026-06-18 153436" src="https://github.com/user-attachments/assets/01be6441-457a-4ea1-b88d-e93b40623756" />
-Example archetypes:
-<img width="999" height="1287" alt="image" src="https://github.com/user-attachments/assets/96da503c-eea8-489a-82c8-a48f34888ba5" />
-Sample outputs with embedded test workflow:
-<img width="1312" height="1984" alt="zit_identityforge_00205_" src="https://github.com/user-attachments/assets/26f0ec17-35dd-40e1-a036-21a7de81a0cd" />
-<img width="1312" height="1984" alt="zit_identityforge_00207_" src="https://github.com/user-attachments/assets/ebb55a64-6694-4285-bb92-13cba5745709" />
-<img width="1312" height="1984" alt="zit_identityforge_00200_" src="https://github.com/user-attachments/assets/d7107faf-498d-41e2-8b7c-dce5c6c0f503" />
-<img width="1312" height="1984" alt="zit_identityforge_00202_" src="https://github.com/user-attachments/assets/5794b2d8-a0ce-41f4-b02f-731cb3f85992" />
-<img width="1312" height="1984" alt="zit_identityforge_00189_" src="https://github.com/user-attachments/assets/16805e63-77b1-4334-9f25-5f9f30877929" />
-<img width="1312" height="1984" alt="zit_identityforge_00187_" src="https://github.com/user-attachments/assets/7ae12729-d7f6-4ea8-aea3-e7b769c87e59" />
-<img width="1312" height="1984" alt="zit_identityforge_00251_" src="https://github.com/user-attachments/assets/1ab4f93a-ce8b-43c0-a587-308db8475344" />
-<img width="1312" height="1984" alt="zit_identityforge_00263_" src="https://github.com/user-attachments/assets/4db343ea-1c57-43a8-b5e8-d530416cb780" />
+
+**The main node** — only a slice of the 70+ options is shown:
+
+<img src="https://github.com/user-attachments/assets/01be6441-457a-4ea1-b88d-e93b40623756" alt="Identity Forge main node" width="480" />
+
+**Example archetypes:**
+
+<img src="https://github.com/user-attachments/assets/96da503c-eea8-489a-82c8-a48f34888ba5" alt="Identity Forge archetype presets" width="320" />
+
+**Sample outputs** (each image embeds the test workflow — drag one into ComfyUI to load it):
+
+<table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/26f0ec17-35dd-40e1-a036-21a7de81a0cd" alt="sample output" width="190" /></td>
+    <td><img src="https://github.com/user-attachments/assets/ebb55a64-6694-4285-bb92-13cba5745709" alt="sample output" width="190" /></td>
+    <td><img src="https://github.com/user-attachments/assets/d7107faf-498d-41e2-8b7c-dce5c6c0f503" alt="sample output" width="190" /></td>
+    <td><img src="https://github.com/user-attachments/assets/5794b2d8-a0ce-41f4-b02f-731cb3f85992" alt="sample output" width="190" /></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/16805e63-77b1-4334-9f25-5f9f30877929" alt="sample output" width="190" /></td>
+    <td><img src="https://github.com/user-attachments/assets/7ae12729-d7f6-4ea8-aea3-e7b769c87e59" alt="sample output" width="190" /></td>
+    <td><img src="https://github.com/user-attachments/assets/1ab4f93a-ce8b-43c0-a587-308db8475344" alt="sample output" width="190" /></td>
+    <td><img src="https://github.com/user-attachments/assets/4db343ea-1c57-43a8-b5e8-d530416cb780" alt="sample output" width="190" /></td>
+  </tr>
+</table>
 
 ---
 
