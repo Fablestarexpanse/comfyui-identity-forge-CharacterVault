@@ -222,6 +222,25 @@ def _build_option_pool(
     return base
 
 
+def _gender_permits(field_def: dict, gender: str, value: str) -> bool:
+    """Whether ``value`` is allowed for ``gender`` by the field's gender pools.
+
+    Only the *gender* dimension is checked (the raw ``female_options`` /
+    ``male_options`` lists), never scope/location coherence — so an intentionally
+    locked fantasy hair colour under a "Natural only" scope is left untouched.
+    A field whose two pools are identical is not gender-gated and always passes.
+    """
+    female = field_def.get("female_options")
+    male = field_def.get("male_options")
+    if female is None or male is None or female == male:
+        return True
+    if gender == "Female":
+        return value in female
+    if gender == "Male":
+        return value in male
+    return value in female or value in male  # "Any" — union of both pools
+
+
 def _bias_skin_tone(pool: list[str], ethnicity: str | None, rng: random.Random) -> list[str]:
     """Optionally narrow the skin-tone pool to the ethnicity's plausible band.
 
@@ -635,6 +654,19 @@ def generate_character(
         and value != "Random"
         and (name not in _HIDDEN_FIELDS or name == "outfit_description")
     }
+
+    # The gender gate must hold for *injected* locks too. An archetype emits
+    # look-defining fields (incl. facial_hair) and its own gender; when the
+    # downstream gender widget overrides that gender, a value that is invalid for
+    # the new gender — e.g. a male archetype's beard on a forced-Female character —
+    # would otherwise be kept verbatim, bypassing the randomizer's gender pools and
+    # the JS widget filter. Drop such values so the field re-randomizes within the
+    # correct gender pool. "None" (an explicit omit) is gender-neutral and stays.
+    for name, value in list(locked_clean.items()):
+        if value != "None" and not _gender_permits(FIELD_DEFINITIONS[name], gender, value):
+            del locked_clean[name]
+            print(f"[IdentityForge] '{name}={value}' is not valid for gender "
+                  f"'{gender}'; re-randomizing within the {gender} pool.")
 
     resolved = _randomize_fields(
         locked_clean, gender, hair_color_scope, accessory_density, location_setting, rng

@@ -74,6 +74,26 @@ class GenderTests(unittest.TestCase):
             self.assertEqual(facial, "clean shaven")
             self.assertNotIn("beard", prose)
 
+    def test_female_override_drops_male_archetype_beard(self):
+        # Regression: a male archetype (Werewolf Hunter) locks facial_hair="short
+        # beard"; forcing gender=Female downstream must NOT keep the beard. The
+        # gender gate has to hold for locked/injected values, not just randomized
+        # ones (the JS widget and the randomizer enforce it, the engine must too).
+        flat = _parse_archetype_json(build_archetype_json("Werewolf Hunter", 0, "Essentials"))
+        self.assertEqual(flat.get("facial_hair"), "short beard")  # archetype carries it
+        locked = {k: v for k, v in flat.items() if k not in _CONTROL_FIELDS}
+        for seed in range(30):
+            prose, js = generate_character(seed, "Female", locked)
+            facial = json.loads(js).get("Hair", {}).get("facial_hair", "clean shaven")
+            self.assertEqual(facial, "clean shaven", f"seed {seed}")
+            self.assertNotIn("beard", prose, f"seed {seed}")
+
+    def test_any_gender_keeps_locked_beard(self):
+        # The gate is gender-specific: under "Any", facial hair stays valid and a
+        # locked beard must survive (Any's pool is the union of both genders).
+        _, js = generate_character(1, "Any", {"facial_hair": "full beard"})
+        self.assertEqual(json.loads(js)["Hair"]["facial_hair"], "full beard")
+
     def test_male_makeup_leans_natural(self):
         for seed in range(40):
             _, js = generate_character(seed, "Male", {})

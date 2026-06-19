@@ -135,6 +135,12 @@ braid, "no makeup" clears every cosmetic, an athletic outfit drops the handbag, 
 sedentary build is never "very muscular", and so on. A rule never overrides a
 field **you** locked; it logs an `[IdentityForge]` notice and keeps your value.
 
+The `gender` toggle is a hard gate, not a coherence rule: gender-specific values
+(e.g. facial hair) are always validated against the chosen gender, even when they
+arrive locked from an archetype. So pointing a masculine archetype at a
+`Female` node never produces a beard — the engine drops the incompatible value,
+re-randomizes it within the `Female` pool, and logs an `[IdentityForge]` notice.
+
 ### Custom options
 
 Add your own choices without editing the source (they survive updates): copy
