@@ -132,7 +132,7 @@ The widgets at the top of Identity Forge steer the whole character:
 | Control | Default | Effect |
 | --- | --- | --- |
 | `seed` | randomize | Reproducibility. Auto-randomizes each run; set to *fixed* to repeat. Not written to the JSON. |
-| `gender` | Any | Pronouns + gender-specific pools (no beards on women, etc.). `Any` defers to a connected archetype. |
+| `gender` | Any | Pronouns + gender-specific presentation (no beards on women; no random makeup, nail polish, feminine jewellery or hairstyles on men). `Any` deliberately mixes both. Deferring to a connected archetype when set to `Any`. |
 | `wardrobe` | Match gender | Outfit wardrobe. `Feminine`/`Masculine`/`Any` deliberately mix (e.g. a man in feminine outfits). |
 | `hair_color_scope` | Natural only | Keeps random hair realistic; `Full spectrum` allows fantasy colours. |
 | `accessory_density` | Balanced | How often bags/jewellery/accessories appear: `None` (bare) · `Minimal` · `Balanced` · `Maximal`. |
@@ -168,6 +168,12 @@ The `gender` toggle is a hard gate, not a coherence rule: gender-specific values
 arrive locked from an archetype. So pointing a masculine archetype at a
 `Female` node never produces a beard — the engine drops the incompatible value,
 re-randomizes it within the `Female` pool, and logs an `[IdentityForge]` notice.
+
+`Male` also applies **masculine presentation defaults** to the *random* fill: no
+makeup, nail polish, feminine jewellery, lip colour or hairstyles. These govern
+randomization only — a value you lock yourself, or one carried by an archetype or
+cosplayer signature, is respected (so a man cosplaying a pigtailed character keeps
+the pigtails). Choose `gender: Any` to mix presentations freely.
 
 ### Custom options
 

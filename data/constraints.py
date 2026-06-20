@@ -240,3 +240,62 @@ for _expr in _OPEN_EXPRESSIONS:
         "type": "requirement", "field": "expression", "value": _expr,
         "requires_field": "smile_type", "requires_value": "toothy grin",
         "reason": f"a {_expr} expression is a broad toothy smile"})
+
+# Masculine presentation defaults (gender == "Male").
+# Many fields (nails, lip colour, jewellery, hairstyle) share one option pool
+# across genders, so the random fill would otherwise hand a male character
+# feminine-coded makeup, polish, pearls or pigtails. These rules govern ONLY the
+# RANDOM fill: a value locked by the user, an archetype, or a cosplayer signature
+# is in the engine's ``locked`` set, so the constraint warns and KEEPS it — which
+# is exactly what faithful crossplay (a man cosplaying a pigtailed character)
+# needs. "Any" is unaffected (it deliberately mixes both genders' pools).
+CONSTRAINT_RULES.append({
+    "type": "requirement", "field": "gender", "value": "Male",
+    "requires_field": "makeup_style", "requires_value": "no makeup",
+    "reason": "a male character is bare-faced by default (cascades to clear all cosmetics)"})
+
+#: field -> feminine-coded values a random Male should not pick up. The remaining
+#: (masculine / neutral) options stay available for the random re-pick.
+_MALE_EXCLUDED_VALUES: dict[str, list[str]] = {
+    "lip_color": ["coral", "berry", "red", "mauve", "plum"],
+    "nails": [
+        "long nails", "almond nails", "coffin nails", "stiletto nails",
+        "french manicure", "nude polish", "red polish", "coral polish",
+        "pink polish", "mauve polish", "deep burgundy", "black polish",
+        "navy polish", "colorful nail art", "minimalist nail art",
+        "chrome nails", "gel nails",
+    ],
+    "earrings": [
+        "pearl studs", "medium gold hoops", "large bold gold hoops",
+        "chandelier earrings", "long drop earrings", "tassel earrings",
+        "mismatched earrings", "clip-on pearl earrings",
+    ],
+    "necklace": [
+        "pearl necklace", "pearl strand", "locket necklace", "choker",
+        "velvet choker", "statement necklace", "collar necklace",
+    ],
+    "other_jewelry": [
+        "stacked bracelets", "thin rings on multiple fingers",
+        "cocktail ring", "layered rings",
+    ],
+    "rings": ["stacked thin bands", "delicate gemstone"],
+    "bracelet": ["tennis bracelet", "charm bracelet"],
+    "hair_style": [
+        "space buns", "pigtails", "updo", "French twist", "crown braid",
+        "fishtail braid", "half up half down",
+    ],
+    "hair_length": ["chin length bob", "waist length", "hip length"],
+    "hair_highlights": ["subtle balayage", "face framing", "ombre", "sombre"],
+    "eyebrows": [
+        "thin and arched", "pencil thin", "feathered", "well defined and arched",
+        "bold statement brows", "laminated brows",
+    ],
+    "lips": ["bow-shaped", "heart-shaped", "petite and defined"],
+    "eye_size": ["doe-like"],
+    "bust": ["large"],
+}
+for _field, _excluded in _MALE_EXCLUDED_VALUES.items():
+    CONSTRAINT_RULES.append({
+        "type": "exclusion", "field": "gender", "value": "Male",
+        "excludes_field": _field, "excludes_values": _excluded,
+        "reason": f"feminine-coded {_field} is not a male default"})

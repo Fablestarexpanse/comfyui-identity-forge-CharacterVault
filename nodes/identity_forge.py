@@ -819,8 +819,12 @@ if _COMFY_AVAILABLE:
                     "gender",
                     options=["Any", "Female", "Male"],
                     default="Any",
-                    tooltip="Steers gender-specific option pools and pronouns. "
-                            "'Any' lets a connected archetype decide.",
+                    tooltip="Steers gender-specific presentation and pronouns: "
+                            "'Male' keeps the random fill masculine (no makeup, "
+                            "polish, feminine jewellery or hairstyles), 'Female' "
+                            "allows them, 'Any' mixes. Locked / archetype / cosplayer "
+                            "values are always respected. 'Any' defers to a connected "
+                            "archetype's gender.",
                 ),
                 io.Combo.Input(
                     "wardrobe",

@@ -105,6 +105,76 @@ class GenderTests(unittest.TestCase):
                 {"gothic dark makeup", "full glam", "bold glam", "heavy glam"},
             )
 
+    # Feminine-coded values a randomly generated Male must never pick up.
+    _MALE_FORBIDDEN = {
+        "makeup_style": None,  # must be "no makeup" (bare-faced)
+        "lips_makeup": None,   # cleared by the no-makeup cascade
+        "lip_color": {"coral", "berry", "red", "mauve", "plum"},
+        "nails": {"red polish", "pink polish", "coral polish", "mauve polish",
+                  "french manicure", "stiletto nails", "coffin nails", "almond nails",
+                  "chrome nails", "gel nails", "colorful nail art"},
+        "earrings": {"chandelier earrings", "long drop earrings", "tassel earrings",
+                     "pearl studs", "large bold gold hoops", "clip-on pearl earrings"},
+        "necklace": {"pearl necklace", "pearl strand", "choker", "velvet choker",
+                     "statement necklace", "collar necklace", "locket necklace"},
+        "hair_style": {"space buns", "pigtails", "updo", "French twist",
+                       "crown braid", "fishtail braid", "half up half down"},
+        "hair_length": {"chin length bob", "waist length", "hip length"},
+        "hair_highlights": {"subtle balayage", "face framing", "ombre", "sombre"},
+        "eyebrows": {"thin and arched", "pencil thin", "feathered",
+                     "well defined and arched", "bold statement brows", "laminated brows"},
+        "lips": {"bow-shaped", "heart-shaped", "petite and defined"},
+        "eye_size": {"doe-like"},
+        "bust": {"large"},
+    }
+
+    def test_male_random_never_feminine(self):
+        # Regression: a Male with default (Match gender) wardrobe must never get
+        # random feminine makeup, lip colour, nail polish, jewellery, or hairstyle.
+        for seed in range(60):
+            doc = json.loads(generate_character(seed, "Male", {}, wardrobe="Match gender")[1])
+            flat = {k: v for g in doc.values() if isinstance(g, dict) for k, v in g.items()}
+            self.assertEqual(flat.get("makeup_style", "no makeup"), "no makeup", f"seed {seed}")
+            for field, forbidden in self._MALE_FORBIDDEN.items():
+                if forbidden and field in flat:
+                    self.assertNotIn(flat[field], forbidden, f"{field} seed {seed}")
+
+    def test_male_prose_has_no_makeup_or_polish(self):
+        for seed in range(40):
+            prose = generate_character(seed, "Male", {})[0].lower()
+            # "polished" (e.g. "polished dress shoes") is an outfit word, not nail
+            # polish — match "polish nails" so the check stays specific.
+            for phrase in ("eyeshadow", "eyeliner", "mascara", "lipstick", "blush",
+                           "polish nails"):
+                self.assertNotIn(phrase, prose, f"'{phrase}' in male prose seed {seed}")
+
+    def test_male_stays_bare_faced_even_when_locked(self):
+        # makeup_style is gender-gated: a female-only value injected on a Male is
+        # dropped, and the masculine default keeps him bare-faced.
+        _, js = generate_character(1, "Male", {"makeup_style": "gothic dark makeup"})
+        self.assertEqual(json.loads(js)["Makeup"]["makeup_style"], "no makeup")
+
+    def test_male_archetype_makeup_dropped(self):
+        # The Vampire Noble archetype (a gothic Male) renders bare-faced as a Male;
+        # its makeup is intended for the Female crossplay rendering.
+        flat = _parse_archetype_json(build_archetype_json("Vampire Noble", 0, "Full preset"))
+        self.assertEqual(flat.get("makeup_style"), "gothic dark makeup")
+        locked = {k: v for k, v in flat.items() if k not in _CONTROL_FIELDS}
+        _, js = generate_character(3, "Male", locked)
+        self.assertEqual(json.loads(js)["Makeup"]["makeup_style"], "no makeup")
+
+    def test_male_locked_feminine_value_is_preserved(self):
+        # The masculine defaults govern only the RANDOM fill: a value locked by a
+        # user/archetype/cosplayer signature (same-pool fields like hair_style)
+        # is respected, so faithful crossplay (a man cosplaying a pigtailed
+        # character) still works.
+        for field, value in (("hair_style", "pigtails"), ("necklace", "pearl necklace"),
+                             ("nails", "red polish")):
+            _, js = generate_character(2, "Male", {field: value})
+            flat = {k: v for g in json.loads(js).values() if isinstance(g, dict)
+                    for k, v in g.items()}
+            self.assertEqual(flat.get(field), value, field)
+
 
 class ControlFieldTests(unittest.TestCase):
     def test_control_fields_absent_from_groups(self):
