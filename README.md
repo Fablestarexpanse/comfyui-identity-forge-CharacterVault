@@ -28,6 +28,8 @@ can splice into a larger prompt.
 | **Identity Forge Archetype** | Dozens of themed presets (knight, sorceress, pirate, ninja, samurai, pop star, astronaut, surgeon…) that wire into Identity Forge to set the *look* while the person underneath randomizes. |
 | **Identity Forge Cosplayer** | Fictional characters (Spider-Man, Batman, Darth Vader, Cloud, 2B, She-Hulk, Zelda…) as a *cosplay look* — the costume is locked onto a random, optionally cross-gender person. |
 | **Identity Forge Modifier** | Prepend a custom descriptor to one field (`footwear: sci-fi`) or a whole group (`Clothing: weathered`) for per-element stylistic tilts — without touching the main node. |
+| **Identity Forge Vault Save** | Save a generated character (image + all field values) to a named vault entry on disk. Passes image and JSON through unchanged so it sits inline in any workflow. |
+| **Identity Forge Vault Load** | Pick a saved character from a dropdown. Hover over any name to see a thumbnail preview. Outputs `character_json` (wire to `archetype_json` to reproduce the character exactly) and the saved image. |
 
 Built on the ComfyUI **V3 API** (`comfy_api.latest`). Category:
 `conditioning/character`.
@@ -69,10 +71,10 @@ Clone into `custom_nodes` and restart ComfyUI (no Python dependencies):
 
 ```bash
 cd ComfyUI/custom_nodes
-git clone https://github.com/EnragedAntelope/comfyui-identity-forge
+git clone https://github.com/Fablestarexpanse/comfyui-identity-forge-CharacterVault
 ```
 
-Or install via **ComfyUI Manager** (search *Identity Forge*, once published).
+Or install via **ComfyUI Manager** (search *Identity Forge Character Vault*, once published).
 
 ---
 
@@ -323,7 +325,7 @@ Seed `42`, Female, `hair_color` = auburn:
 
 The `user_options.json` route above is for private or instant additions, but you
 don't have to maintain your own list forever. **Suggestions are welcome** — open an
-[issue](https://github.com/EnragedAntelope/comfyui-identity-forge/issues) (or a PR)
+[issue](https://github.com/Fablestarexpanse/comfyui-identity-forge-CharacterVault/issues) (or a PR)
 proposing new cosplayers, archetypes, outfit styles, or fields and they can be
 folded into the built-in set so everyone gets them on the next update. For
 cosplayers, a costume description (worn items only) and the franchise are enough to
