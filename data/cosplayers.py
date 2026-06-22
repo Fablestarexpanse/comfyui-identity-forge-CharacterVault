@@ -287,6 +287,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "warm brown", "hair_length": "waist length",
                       "hair_style": "high ponytail", "eye_color": "medium brown"},
         "physique": {"body_type": "curvy", "height": "average height", "skin_tone": "fair"},
+        "prop": "a pair of folding paper fans painted with red flowers, one open "
+                "in each hand",
     },
     "Kitana": {
         "franchise": "Mortal Kombat",
@@ -296,6 +298,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "jet black", "hair_length": "long",
                       "hair_style": "high ponytail", "eye_color": "medium brown"},
         "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "light medium"},
+        "prop": "a pair of bladed steel war fans, fanned open to bare their razor "
+                "edges, one in each hand",
     },
     "Skarlet": {
         "franchise": "Mortal Kombat",
@@ -392,6 +396,8 @@ COSPLAYERS: dict[str, dict] = {
                    "tunic with leggings, and armored pieces",
         "signature": {},
         "physique": {"body_type": "athletic", "height": "average height"},
+        "prop": "a pair of ignited lightsabers, a long white energy blade in one "
+                "hand and a shorter white shoto blade in the other",
     },
     "Princess Leia Organa": {
         "franchise": "Star Wars",
@@ -502,6 +508,7 @@ COSPLAYERS: dict[str, dict] = {
                       "hair_style": "dutch braids", "eye_color": "bright green",
                       "skin_details": "scattered sun freckles"},
         "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+        "prop": "a drawn wood-and-sinew tribal hunting bow, an arrow nocked",
     },
 
     # --- Avatar: The Last Airbender / Korra ------------------------------
@@ -794,6 +801,7 @@ COSPLAYERS: dict[str, dict] = {
                       "hair_texture": "curly", "eye_color": "bright blue",
                       "skin_details": "light freckles across nose"},
         "physique": {"body_type": "athletic", "height": "short", "skin_tone": "fair"},
+        "prop": "a drawn wooden longbow worn smooth with use, an arrow nocked",
     },
     "Pocahontas": {
         "franchise": "Pocahontas",
@@ -833,6 +841,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "dark brown", "hair_length": "long",
                       "hair_style": "side braid", "eye_color": "gray"},
         "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "olive"},
+        "prop": "a drawn recurve bow of black-and-silver composite limbs, an "
+                "arrow nocked",
     },
     "Daenerys Targaryen": {
         "franchise": "Game of Thrones",
@@ -852,6 +862,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "dark brown", "hair_length": "long",
                       "hair_style": "curtain bangs", "eye_color": "bright blue"},
         "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+        "prop": "the chakram, a round flat steel throwing disc edged with a blade "
+                "and etched in gold",
     },
     "Yennefer of Vengerberg": {
         "franchise": "The Witcher",
@@ -909,6 +921,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "chestnut", "hair_length": "slightly past shoulders",
                       "hair_style": "worn down", "eye_color": "bright blue"},
         "physique": {"body_type": "athletic", "height": "statuesque", "skin_tone": "fair"},
+        "prop": "a round shield emblazoned with the red, white, and blue Union "
+                "Jack, the crossed-bar flag framed by a polished metal rim",
     },
     "Jean Grey": {
         "franchise": "Marvel",
@@ -936,6 +950,7 @@ COSPLAYERS: dict[str, dict] = {
                    "guards",
         "signature": {"hair_color": "purple", "hair_length": "long", "hair_style": "worn down"},
         "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "olive"},
+        "prop": "a glowing pink psychic energy katana projected from one fist",
     },
     "Gamora": {
         "franchise": "Marvel",
@@ -982,6 +997,7 @@ COSPLAYERS: dict[str, dict] = {
                       "hair_style": "worn down", "eye_color": "dark brown"},
         "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "olive",
                      "ethnicity": "Greek"},
+        "prop": "a pair of steel three-pronged sai, one spun in each hand",
     },
     "Invisible Woman": {
         "franchise": "Marvel",
@@ -1097,6 +1113,7 @@ COSPLAYERS: dict[str, dict] = {
                    "skin",
         "signature": {},
         "physique": {"body_type": "slender", "height": "tall"},
+        "prop": "a tall slender black staff topped with a glowing green orb",
     },
     "Ursula": {
         "franchise": "The Little Mermaid",
@@ -1548,6 +1565,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "auburn", "hair_length": "shoulder length",
                       "hair_style": "worn down"},
         "physique": {"body_type": "lean", "height": "tall", "skin_tone": "fair"},
+        "prop": "a fanned hand of playing cards crackling with charged "
+                "pink-and-violet kinetic energy",
     },
     "Nightcrawler": {
         "franchise": "Marvel",
@@ -1565,6 +1584,7 @@ COSPLAYERS: dict[str, dict] = {
                    "silver body paint",
         "mask": "a featureless chrome head with blank silver eyes",
         "physique": {"body_type": "lean", "height": "tall"},
+        "prop": "a sleek mirror-chrome cosmic surfboard, held upright at his side",
     },
     "Winter Soldier": {
         "franchise": "Marvel",
@@ -1678,6 +1698,7 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "jet black", "hair_length": "jaw length",
                       "hair_style": "slicked back", "eye_color": "bright blue"},
         "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+        "prop": "a pair of blue-tipped escrima fighting sticks, one in each hand",
     },
     "Shazam": {
         "franchise": "DC",
@@ -1772,6 +1793,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "auburn", "hair_length": "jaw length",
                       "facial_hair": "full beard", "eye_color": "bright blue"},
         "physique": {"body_type": "lean", "height": "average height", "skin_tone": "fair"},
+        "prop": "an ignited lightsaber with a bright blue energy blade and a "
+                "ribbed silver hilt",
     },
     "Yoda": {
         "franchise": "Star Wars",
@@ -1780,6 +1803,8 @@ COSPLAYERS: dict[str, dict] = {
                    "ears, and sparse white hair",
         "signature": {"eye_color": "green"},
         "physique": {"body_type": "slim", "height": "very petite"},
+        "prop": "a small ignited lightsaber with a short green energy blade and a "
+                "stubby silver hilt",
     },
     "Mace Windu": {
         "franchise": "Star Wars",
@@ -1788,6 +1813,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_length": "buzzed very short", "facial_hair": "clean shaven",
                       "eye_color": "dark brown"},
         "physique": {"body_type": "lean", "height": "tall", "skin_tone": "dark brown"},
+        "prop": "an ignited lightsaber with a deep amethyst-purple energy blade "
+                "and a polished silver hilt",
     },
     "Anakin Skywalker": {
         "franchise": "Star Wars",
@@ -1797,6 +1824,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "dark brown", "hair_length": "shoulder length",
                       "hair_texture": "wavy", "eye_color": "bright blue"},
         "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+        "prop": "an ignited lightsaber with a bright blue energy blade and a "
+                "black-gripped silver hilt",
     },
     "Kylo Ren": {
         "franchise": "Star Wars",
@@ -1806,6 +1835,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "jet black", "hair_length": "jaw length",
                       "hair_texture": "wavy", "eye_color": "dark brown"},
         "physique": {"body_type": "lean", "height": "tall", "skin_tone": "fair"},
+        "prop": "an ignited crossguard lightsaber with a ragged, unstable red "
+                "energy blade and two short red blade vents flaring from the hilt",
     },
     "Boba Fett": {
         "franchise": "Star Wars",
@@ -1832,6 +1863,8 @@ COSPLAYERS: dict[str, dict] = {
                    "intricate black tattoos and a crown of short black horns ringing the "
                    "head",
         "physique": {"body_type": "lean", "height": "average height"},
+        "prop": "an ignited double-bladed lightsaber, a long silver staff hilt "
+                "with a red energy blade burning at each end",
     },
     "Chewbacca": {
         "franchise": "Star Wars",
@@ -2305,6 +2338,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "dark brown", "hair_length": "long",
                       "facial_hair": "short beard", "eye_color": "gray"},
         "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+        "prop": "Anduril, a long broad-bladed sword with an ornate engraved "
+                "crossguard",
     },
     "Legolas": {
         "franchise": "Lord of the Rings",
@@ -2314,6 +2349,7 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "light blonde", "hair_length": "long",
                       "hair_texture": "pin straight", "eye_color": "bright blue"},
         "physique": {"body_type": "lean", "height": "tall", "skin_tone": "fair"},
+        "prop": "a drawn elven longbow of pale carved wood, an arrow nocked",
     },
     "Gandalf": {
         "franchise": "Lord of the Rings",
@@ -2331,6 +2367,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "auburn", "hair_length": "shoulder length",
                       "facial_hair": "full beard", "eye_color": "dark brown"},
         "physique": {"body_type": "stocky", "height": "short", "skin_tone": "fair"},
+        "prop": "a broad double-bitted dwarven battle axe with a rune-etched head "
+                "and a leather-wrapped haft",
     },
     "Frodo Baggins": {
         "franchise": "Lord of the Rings",
