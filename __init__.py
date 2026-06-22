@@ -21,35 +21,40 @@ from comfy_api.latest import ComfyExtension, io
 
 # ---------------------------------------------------------------------------
 # Vault image preview route — serves saved character PNGs so the JS frontend
-# can display hover thumbnails without executing the node first.
-# Registered here so it's available as soon as the pack loads.
+# can show an inline preview inside the node without running the workflow.
 # ---------------------------------------------------------------------------
-try:
-    import os
-    from pathlib import Path
-    from aiohttp import web
-    from server import PromptServer  # type: ignore[import-not-found]
+def _register_vault_preview_route() -> None:
+    """Register the vault preview route on the ComfyUI PromptServer.
 
+    Wrapped in a function so any failure is fully isolated — a broken route
+    must never prevent the node pack from loading.
+    """
     try:
-        import folder_paths as _fp
-        _ROUTE_VAULT_DIR: Path = Path(_fp.get_output_directory()) / "character_vault"
-    except ImportError:
-        _ROUTE_VAULT_DIR = Path(__file__).resolve().parent.parent / "vault"
+        from pathlib import Path
+        from aiohttp import web
+        from server import PromptServer  # type: ignore[import-not-found]
 
-    @PromptServer.instance.routes.get("/identity_forge/vault/preview/{character_name}")
-    async def _vault_preview(request: web.Request) -> web.Response:
-        """Serve the saved PNG for one character (used by the hover preview in JS)."""
-        name = request.match_info["character_name"]
-        img_path = _ROUTE_VAULT_DIR / name / "image.png"
-        if not img_path.exists():
-            raise web.HTTPNotFound()
-        return web.FileResponse(
-            img_path,
-            headers={"Cache-Control": "no-cache", "Access-Control-Allow-Origin": "*"},
-        )
+        try:
+            import folder_paths as _fp
+            _vault_dir: Path = Path(_fp.get_output_directory()) / "character_vault"
+        except Exception:
+            _vault_dir = Path(__file__).resolve().parent / "vault"
 
-except (ImportError, AttributeError):
-    pass  # Running outside ComfyUI — route is simply absent
+        @PromptServer.instance.routes.get("/identity_forge/vault/preview/{character_name}")
+        async def _vault_preview(request: web.Request) -> web.Response:
+            name = request.match_info["character_name"]
+            img_path = _vault_dir / name / "image.png"
+            if not img_path.exists():
+                raise web.HTTPNotFound()
+            return web.FileResponse(
+                img_path,
+                headers={"Cache-Control": "no-cache"},
+            )
+    except Exception:
+        pass  # Not running inside ComfyUI, or PromptServer not yet ready
+
+
+_register_vault_preview_route()
 
 # ---------------------------------------------------------------------------
 # Node imports
