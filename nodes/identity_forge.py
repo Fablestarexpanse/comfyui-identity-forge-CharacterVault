@@ -1091,6 +1091,7 @@ if _COMFY_AVAILABLE:
                 outputs=[
                     io.String.Output(display_name="prompt_text"),
                     io.String.Output(display_name="prompt_json"),
+                    io.Int.Output(display_name="seed"),
                 ],
             )
 
@@ -1132,4 +1133,4 @@ if _COMFY_AVAILABLE:
                 accessory_density, location_setting, cosplay_label, covers_face,
                 modifiers,
             )
-            return io.NodeOutput(prose, json_output)
+            return io.NodeOutput(prose, json_output, seed)

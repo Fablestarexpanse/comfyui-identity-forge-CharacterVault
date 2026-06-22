@@ -165,13 +165,11 @@ if _COMFY_AVAILABLE:
                     ),
                     io.Int.Input(
                         "seed",
-                        default=0,
-                        min=0,
-                        max=0xFFFFFFFFFFFFFFFF,
+                        force_input=True,
                         tooltip=(
-                            "The seed that produced this character. Wire a Primitive "
-                            "node here and to Identity Forge's seed so they always match. "
-                            "The seed becomes the folder name in the vault."
+                            "Wire from Identity Forge's 'seed' output. "
+                            "The seed becomes the folder name in the vault so each "
+                            "character is unique and traceable."
                         ),
                     ),
                 ],
