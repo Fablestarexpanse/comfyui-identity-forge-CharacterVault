@@ -32,6 +32,18 @@ the Iron Man armor). It is a no-op for face-visible characters. Keeping the head
 covering in its own field is what lets it be removed cleanly, with no stray
 "faceplate" reference stranded in the costume prose.
 
+### Signature props
+
+Costumes stay **worn, not held** — but a character with a *truly iconic* held prop
+may carry it in an optional **`prop`** string (Thor's hammer, Captain America's
+shield, Link's Master Sword). The node's **`props`** widget is **off by default**;
+**Include signature prop** emits the prop as the hidden `held_item` field, voiced
+downstream as *holding …*. It is a no-op for characters without a `prop`. The prop
+is described richly, like a costume (shape, colours, materials, markings), and lives
+*outside* `costume` so the toggle can add or drop it cleanly. It is opt-in because
+most characters have no signature prop and because held objects can stress hand
+rendering in some text-to-image models.
+
 ### Chaining presets
 
 Both preset nodes expose an optional **`upstream`** input, so Archetype and
@@ -87,8 +99,10 @@ you just toggle which one is active.
 The shipped set is a curated starter list and grows over time. Add your own
 without editing the source (survives `git pull`) via the `cosplayers` section of
 `user_options.json` — see `user_options.example.json`. A `gender: "Male"` entry is
-how the `Random — male` pick gets populated. Worn items only; leave held props and
-weapons out and add them by editing the prompt before rendering. For a fully masked
+how the `Random — male` pick gets populated. `costume` lists worn items only; give
+a character its one iconic held item via the optional `"prop"` string (emitted only
+when the node's `props` toggle is on), and add any other held items by editing the
+prompt before rendering. For a fully masked
 head set `"covers_face": true` **and** put the head covering in a separate `"mask"`
 string (kept out of `costume`) so the *Unmask* toggle can drop it. Keep costume
 text and names plain ASCII (no em dashes / smart quotes) so text-to-image

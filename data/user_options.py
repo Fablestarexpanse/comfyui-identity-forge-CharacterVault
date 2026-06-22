@@ -27,6 +27,7 @@ source — so updates won't clobber them. Two sections, both optional::
         "Custom Hero (My OC)": {
           "franchise": "Original", "gender": "Female",
           "costume": "a teal-and-silver bodysuit with a star emblem and white boots",
+          "prop": "a glowing teal energy glaive held in one hand",
           "signature": {"hair_color": "electric blue", "hair_length": "long"},
           "physique": {"body_type": "athletic", "height": "tall"}
         },
@@ -58,8 +59,9 @@ Reload the node / restart ComfyUI to apply. Notes:
 * ``archetypes`` adds presets to the Archetype node (same ``{field: value}``
   shape as the built-ins; ``outfit_description`` may use ``{slot}`` costume
   placeholders). ``cosplayers`` adds characters to the Cosplayer node (keys:
-  ``franchise``, ``gender`` Female/Male, ``costume`` text, optional ``signature``
-  / ``physique`` ``{field: value}`` maps). A user entry whose name matches a
+  ``franchise``, ``gender`` Female/Male, ``costume`` text, optional ``prop`` (a
+  signature held item, voiced as "holding …" when the node's prop toggle is on),
+  optional ``signature`` / ``physique`` ``{field: value}`` maps). A user entry whose name matches a
   built-in overrides it. Run ``python tests/validate_data.py`` to check that your
   field values are valid options.
 * **Masked characters (the ``mask`` flow — easy to get wrong).** For a full
@@ -253,9 +255,10 @@ def apply_user_cosplayers(cosplayers: dict[str, dict], path: Path | None = None)
     Each entry needs a ``costume`` string (the only required key); ``franchise``
     defaults to "", ``gender`` to "Female" (used only for Random scoping),
     ``covers_face`` to ``False`` (set ``True`` for a fully masked head, and put the
-    head covering in ``mask`` — see the module docstring), and ``signature`` /
-    ``physique`` to empty maps. A user entry whose name matches a built-in
-    overrides it. Returns the number of characters added.
+    head covering in ``mask`` — see the module docstring), an optional ``prop``
+    (a signature held item, emitted only when the Cosplayer node's prop toggle is
+    on), and ``signature`` / ``physique`` to empty maps. A user entry whose name
+    matches a built-in overrides it. Returns the number of characters added.
     """
     path = path or USER_OPTIONS_PATH
     added = 0
@@ -268,12 +271,14 @@ def apply_user_cosplayers(cosplayers: dict[str, dict], path: Path | None = None)
         gender = entry.get("gender")
         franchise = entry.get("franchise")
         mask = entry.get("mask")
+        prop = entry.get("prop")
         cosplayers[name] = {
             "franchise": franchise if isinstance(franchise, str) else "",
             "gender": gender if gender in ("Female", "Male") else "Female",
             "covers_face": bool(entry.get("covers_face", False)),
             "costume": costume,
             "mask": mask if isinstance(mask, str) else "",
+            "prop": prop if isinstance(prop, str) else "",
             "signature": _clean_field_map(entry.get("signature")),
             "physique": _clean_field_map(entry.get("physique")),
         }

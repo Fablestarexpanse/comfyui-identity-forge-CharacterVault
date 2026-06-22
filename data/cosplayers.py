@@ -28,10 +28,18 @@ Schema per entry (keyed by character name)::
 
 Curation rules (so the data stays coherent with the engine):
 
-* **Worn, not held.** Costumes list only *worn* items — clothing, footwear,
+* **Worn, not held.** ``costume`` lists only *worn* items — clothing, footwear,
   gloves, masks/cowls, headwear, hair bows, jewellery, belts, empty holsters,
   body paint, markings, capes. Held / wielded props (swords, staves, bows, guns,
-  shields, wands) are deliberately omitted; add them by editing the prompt.
+  shields, wands) stay *out* of ``costume``.
+* **Signature props (optional, opt-in).** A character with a *truly iconic* held
+  prop may carry it in an optional ``"prop"`` key — a free-text phrase that reads
+  naturally after "holding …" (e.g. ``"Mjolnir, a short-handled rectangular war
+  hammer with a worn leather grip"``). It is emitted only when the Cosplayer node's
+  prop toggle is on (off by default), as the hidden ``held_item`` lock. Describe it
+  richly and distinctively like a costume — shape, colours, materials, markings —
+  not as a bare noun, and keep the same plain-ASCII style. Most characters have no
+  signature prop: omit the key entirely rather than inventing one.
 * ``costume`` reads naturally after "She/He wears …" (it is voiced verbatim as
   the outfit), so it starts lowercase with an article.
 * ``signature`` / ``physique`` keys must be real :data:`data.fields.FIELD_DEFINITIONS`
@@ -330,6 +338,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "golden blonde", "hair_length": "slightly past shoulders",
                       "hair_style": "high ponytail", "eye_color": "bright blue"},
         "physique": {"body_type": "slender", "height": "average height", "skin_tone": "fair"},
+        "prop": "the Caduceus staff, a slender golden rod topped with a glowing "
+                "winged medical emblem",
     },
     "Widowmaker": {
         "franchise": "Overwatch",
@@ -409,6 +419,7 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "warm brown", "hair_length": "shoulder length",
                       "hair_style": "space buns", "eye_color": "warm hazel"},
         "physique": {"body_type": "slender", "height": "average height", "skin_tone": "warm tan"},
+        "prop": "a long worn quarterstaff of weathered metal and wrapped leather",
     },
 
     # --- Nintendo / Zelda -------------------------------------------------
@@ -479,6 +490,7 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "warm brown", "hair_length": "long",
                       "hair_style": "low ponytail", "eye_color": "dark brown"},
         "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "warm tan"},
+        "prop": "a pair of matte-black semi-automatic pistols, one in each hand",
     },
     "Aloy": {
         "franchise": "Horizon",
@@ -550,6 +562,7 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "raven black", "hair_length": "long",
                       "hair_style": "worn down", "eye_color": "bright blue"},
         "physique": {"body_type": "athletic", "height": "statuesque", "skin_tone": "warm tan"},
+        "prop": "the Lasso of Truth, a coil of glowing golden rope at the hip",
     },
     "Harley Quinn": {
         "franchise": "DC",
@@ -559,6 +572,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "platinum blonde", "hair_length": "shoulder length",
                       "hair_style": "pigtails", "eye_color": "bright blue"},
         "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+        "prop": "an oversized wooden mallet with a red-and-black striped head, slung "
+                "over one shoulder",
     },
     "Poison Ivy": {
         "franchise": "DC",
@@ -1393,6 +1408,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "golden blonde", "hair_length": "very short",
                       "eye_color": "bright blue"},
         "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+        "prop": "a round shield with concentric red and white rings and a white "
+                "five-pointed star on a blue center",
     },
     "Thor": {
         "franchise": "Marvel",
@@ -1402,6 +1419,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "golden blonde", "hair_length": "long",
                       "facial_hair": "short beard", "eye_color": "bright blue"},
         "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+        "prop": "Mjolnir, a short-handled rectangular war hammer with a worn "
+                "leather-wrapped grip",
     },
     "Hulk": {
         "franchise": "Marvel",
@@ -1430,6 +1449,7 @@ COSPLAYERS: dict[str, dict] = {
                    "holsters, and ammo pouches and belts",
         "mask": "a full red and black mask with white teardrop eye patches",
         "physique": {"body_type": "athletic", "height": "average height"},
+        "prop": "twin steel katanas, one gripped in each hand",
     },
     "Black Panther": {
         "franchise": "Marvel",
@@ -1458,6 +1478,7 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "dark blonde", "hair_length": "very short",
                       "facial_hair": "stubble", "eye_color": "bright blue"},
         "physique": {"body_type": "athletic", "height": "average height", "skin_tone": "fair"},
+        "prop": "a pair of retro chrome-and-orange element blasters, one in each hand",
     },
     "Loki": {
         "franchise": "Marvel",
@@ -1629,6 +1650,7 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "golden blonde", "hair_length": "long",
                       "facial_hair": "short beard", "eye_color": "green"},
         "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "tan"},
+        "prop": "a five-pronged golden trident with long barbed tines",
     },
     "Green Arrow": {
         "franchise": "DC",
@@ -1638,6 +1660,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "golden blonde", "hair_length": "very short",
                       "facial_hair": "van dyke", "eye_color": "green"},
         "physique": {"body_type": "athletic", "height": "tall", "skin_tone": "fair"},
+        "prop": "a drawn recurve bow of green-and-black composite limbs, an arrow "
+                "nocked",
     },
     "Cyborg": {
         "franchise": "DC",
@@ -1718,6 +1742,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "dirty blonde", "hair_length": "very short",
                       "eye_color": "bright blue"},
         "physique": {"body_type": "lean", "height": "average height", "skin_tone": "fair"},
+        "prop": "an ignited lightsaber with a bright green energy blade and a silver "
+                "ribbed hilt",
     },
     "Han Solo": {
         "franchise": "Star Wars",
@@ -1736,6 +1762,8 @@ COSPLAYERS: dict[str, dict] = {
                    "black cape",
         "mask": "a glossy black domed helmet and skull-like mask with triangular eye lenses",
         "physique": {"body_type": "athletic", "height": "very tall"},
+        "prop": "an ignited lightsaber with a deep red energy blade and a black "
+                "ribbed hilt",
     },
     "Obi-Wan Kenobi": {
         "franchise": "Star Wars",
@@ -1877,6 +1905,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "golden blonde", "hair_length": "very short",
                       "hair_style": "windswept", "eye_color": "bright blue"},
         "physique": {"body_type": "lean", "height": "average height", "skin_tone": "fair"},
+        "prop": "the Buster Sword, an enormous broad-bladed greatsword held over one "
+                "shoulder",
     },
     "Sephiroth": {
         "franchise": "Final Fantasy",
@@ -1886,6 +1916,7 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "silver", "hair_length": "very long",
                       "hair_texture": "pin straight", "eye_color": "bright green"},
         "physique": {"body_type": "lean", "height": "tall", "skin_tone": "pale"},
+        "prop": "the Masamune, an impossibly long slender silver katana",
     },
     "Squall": {
         "franchise": "Final Fantasy",
@@ -1895,6 +1926,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "dark brown", "hair_length": "very short",
                       "eye_color": "deep blue"},
         "physique": {"body_type": "lean", "height": "average height", "skin_tone": "fair"},
+        "prop": "a gunblade, a broad sword with a revolver grip and trigger at the "
+                "hilt",
     },
     "Tidus": {
         "franchise": "Final Fantasy",
@@ -2251,6 +2284,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "golden blonde", "hair_length": "very short",
                       "eye_color": "bright blue"},
         "physique": {"body_type": "lean", "height": "average height", "skin_tone": "fair"},
+        "prop": "the Master Sword, a double-edged blade with a blue-and-gold winged "
+                "crossguard",
     },
     "Ganondorf": {
         "franchise": "Nintendo",
@@ -2287,6 +2322,7 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_color": "silver", "hair_length": "very long",
                       "facial_hair": "full beard", "eye_color": "blue-gray"},
         "physique": {"body_type": "average", "height": "tall", "skin_tone": "fair"},
+        "prop": "a tall gnarled wooden staff with a knotted natural crook at the top",
     },
     "Gimli": {
         "franchise": "Lord of the Rings",
@@ -2325,6 +2361,8 @@ COSPLAYERS: dict[str, dict] = {
         "signature": {"hair_length": "buzzed very short", "facial_hair": "full beard",
                       "eye_color": "dark brown"},
         "physique": {"body_type": "athletic", "height": "very tall"},
+        "prop": "the Leviathan Axe, a heavy frost-etched battle axe with a "
+                "leather-wrapped haft",
     },
     "Master Chief": {
         "franchise": "Halo",
@@ -2334,6 +2372,8 @@ COSPLAYERS: dict[str, dict] = {
                    "and gauntlets",
         "mask": "a helmet with a golden-orange reflective visor",
         "physique": {"body_type": "athletic", "height": "very tall"},
+        "prop": "an MA5 assault rifle with a boxy top-mounted magazine and a digital "
+                "ammo counter",
     },
     "Solid Snake": {
         "franchise": "Metal Gear",

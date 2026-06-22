@@ -16,7 +16,7 @@ can splice into a larger prompt.
 - 🎲 **Reproducible** — seed-driven, so any character you like comes back exactly.
 - 🧩 **Coherent by design** — a constraint engine resolves clashing traits for you.
 - 🎭 **Archetypes** — knight, sorceress, pirate, ninja, samurai, pop star, astronaut, surgeon… as a one-wire preset.
-- 🦹 **Cosplayers** — a random person cosplaying a fictional character, with crossplay (and a helmet-off *Unmask* toggle) supported.
+- 🦹 **Cosplayers** — a random person cosplaying a fictional character, with crossplay, a helmet-off *Unmask* toggle, and opt-in signature props (Thor's hammer, Cap's shield) supported.
 - ✨ **Modifiers** — prepend a custom descriptor to a single element (sci-fi shoes, glowing earrings, iridescent skin) without theming the whole image.
 - 🔗 **Chainable presets** — wire Archetype → Cosplayer → Modifier → Identity Forge so they stack instead of fighting over one socket.
 - 🔌 **Zero dependencies, fully offline** — no LLM, no API keys, no model downloads.
@@ -137,9 +137,14 @@ prefixed `Cosplaying as <Character> (<Franchise>):`.
   face)** drops the head covering and reveals the randomized head/hair under the
   suit — a helmet-off look (Tony Stark in the Iron Man armor, Peter Parker in the
   suit). It has no effect on face-visible characters.
+- **`props`**: **off by default.** Choose **Include signature prop** to add a
+  character's iconic held item — Thor's hammer, Captain America's shield, Link's
+  Master Sword — voiced as *holding …*. Only characters that have a signature prop
+  are affected; everyone else is unchanged. (Note: held objects can stress hand
+  rendering in some models, which is why it is opt-in.)
 - Chain it with the Archetype node via the `upstream` input (see *Stacking
-  presets* above) — no need to unplug one to use the other. Held props/weapons are
-  left out on purpose — add them in the prompt.
+  presets* above) — no need to unplug one to use the other. Costumes still list
+  only *worn* items; held props beyond the signature toggle go in the prompt.
 
 See [docs/cosplayer-notes.md](docs/cosplayer-notes.md) for the finer details.
 
@@ -190,7 +195,7 @@ The widgets at the top of Identity Forge steer the whole character:
 | `wardrobe` | Match gender | Outfit wardrobe. `Feminine`/`Masculine`/`Any` deliberately mix (e.g. a man in feminine outfits). |
 | `hair_color_scope` | Natural only | Keeps random hair realistic; `Full spectrum` allows fantasy colours. |
 | `accessory_density` | Balanced | How often bags/jewellery/accessories appear: `None` (bare) · `Minimal` · `Balanced` · `Maximal`. |
-| `location_setting` | Any | Restrict the random scene to `Indoor` or `Outdoor` (a locked location wins). |
+| `location_setting` | Any indoor/outdoor | Restrict the random scene. `Any indoor/outdoor` (default) picks any real location but never a studio. `Indoor` / `Outdoor` narrow to real scenes. `Studio / solid backdrop` forces a plain, easily-maskable background — seamless grey, solid white, solid black, or chroma-key green screen — plus clean studio light (handy for cutting the subject out afterwards). A locked location wins. |
 | `set_all_fields` | Off | `All to None` blanks every field still on `Random` so only the fields you lock to a value appear — a one-click "start from nothing". A wired costume and the character's signature look (hair, eyes, physique) are kept. |
 
 > **Tip:** the old "everyone carries a bag" problem is handled by
@@ -262,7 +267,9 @@ restart ComfyUI. Four optional sections:
   shape as the built-ins; `outfit_description` may use `{slot}` placeholders).
 - **`cosplayers`** adds characters to the **Cosplayer** node. `costume` (worn
   items only) is required; `franchise`/`gender` are optional; `signature` (both
-  modes) and `physique` (Full character) are `{field: value}` maps. A `gender:
+  modes) and `physique` (Full character) are `{field: value}` maps. An optional
+  `"prop"` string adds a signature held item, voiced as *holding …* when the
+  node's `props` toggle is on (describe it richly, like a costume). A `gender:
   "Male"` entry is how you populate the `Random — male` pick. For a fully masked
   head set `"covers_face": true` **and** put the head covering in a separate
   `"mask"` string (kept out of `costume`) so the *Unmask* toggle can drop it.

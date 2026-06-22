@@ -24,6 +24,12 @@ Full-mask characters (``covers_face``) carry their head covering in a separate
 suppressed); ``"Unmask (show face)"`` drops it so the randomized head shows under
 the suit — a helmet-off look. It is a no-op for face-visible characters.
 
+Characters with a signature held prop (Thor's hammer, Captain America's shield)
+carry it in an optional ``prop`` field. The ``props`` widget is **off by default**
+("worn, not held" stays the norm); ``"Include signature prop"`` emits the prop as
+the hidden ``held_item`` lock, voiced downstream as "holding …". It is a no-op for
+characters without a ``prop``.
+
 The *person's* gender is chosen on the IdentityForge node, independent of the
 character's, so crossplay (e.g. a man cosplaying a female character) works: the
 downstream gender gate drops any value invalid for the chosen gender. The source
@@ -78,6 +84,10 @@ _FULL = "Full character"
 _MASK_DEFAULT = "Default"
 _MASK_OFF = "Unmask (show face)"
 
+#: Signature-prop options (only affect characters that carry a ``prop``).
+_PROP_OFF = "No prop"
+_PROP_ON = "Include signature prop"
+
 
 def _resolve_character(character: str, rng: random.Random) -> str | None:
     """Resolve a combo selection to a concrete character name.
@@ -102,6 +112,7 @@ def build_cosplayer_json(
     seed: int = 0,
     look_level: str = _COSTUME_ONLY,
     mask_mode: str = _MASK_DEFAULT,
+    include_prop: bool = False,
 ) -> str:
     """Return the cosplay preset as a grouped JSON string.
 
@@ -115,6 +126,10 @@ def build_cosplayer_json(
     ``"Unmask (show face)"`` omits the mask clause and clears ``covers_face`` so
     the randomized head/hair shows (a "helmet-off" look). It is a no-op for
     face-visible characters.
+
+    ``include_prop`` (default ``False``) adds the character's signature held prop
+    (e.g. Thor's hammer) as the hidden ``held_item`` lock, voiced downstream as
+    "holding …". It is a no-op for characters without a ``prop``.
     """
     rng = random.Random(seed)
     name = _resolve_character(character, rng)
@@ -136,6 +151,9 @@ def build_cosplayer_json(
     fields.update(entry.get("signature", {}))
     if look_level == _FULL:
         fields.update(entry.get("physique", {}))
+    # Signature held prop → hidden held_item lock (opt-in; off by default).
+    if include_prop and entry.get("prop"):
+        fields["held_item"] = entry["prop"]
 
     document: "OrderedDict[str, Any]" = OrderedDict()
     document["_meta"] = OrderedDict([
@@ -196,6 +214,16 @@ if _COMFY_AVAILABLE:
                                 "(a helmet-off look). No effect on face-visible "
                                 "characters.",
                     ),
+                    io.Combo.Input(
+                        "props",
+                        options=[_PROP_OFF, _PROP_ON],
+                        default=_PROP_OFF,
+                        tooltip="Off by default. 'Include signature prop' adds the "
+                                "character's iconic held prop (e.g. Thor's hammer, "
+                                "Captain America's shield), voiced as 'holding …'. No "
+                                "effect on characters without a signature prop. Note: "
+                                "held objects can stress hand rendering in some models.",
+                    ),
                     io.Int.Input(
                         "seed",
                         default=0,
@@ -228,6 +256,7 @@ if _COMFY_AVAILABLE:
                 int(kwargs.get("seed", 0)),
                 kwargs.get("look_level", _COSTUME_ONLY),
                 kwargs.get("mask", _MASK_DEFAULT),
+                kwargs.get("props", _PROP_OFF) == _PROP_ON,
             )
             character_json = merge_preset_documents(kwargs.get("upstream", ""), own)
             return io.NodeOutput(character_json)

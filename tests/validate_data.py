@@ -21,6 +21,7 @@ import re
 
 from data.fields import (
     FIELD_DEFINITIONS, OUTFIT_DESCRIPTIONS, SKIN_TONE_BANDS, ETHNICITY_REGION,
+    STUDIO_BACKDROPS,
 )
 from data.constraints import CONSTRAINT_RULES
 from data.templates import ARCHETYPES, COSTUME_SLOTS
@@ -36,9 +37,10 @@ _EXPECTED_OUTFIT_STYLES = {
     "athletic", "resort vacation", "edgy alternative",
     "preppy", "vintage retro", "loungewear",
 }
-#: outfit_description is a hidden, engine-generated / costume field whose values
-#: are free-form prose, so its values are not validated against an option pool.
-_FREEFORM_FIELDS = {"outfit_description"}
+#: Hidden fields whose values are free-form prose (a costume override, a held
+#: prop), so their values are not validated against an option pool — and they are
+#: not allowed in a cosplayer's signature/physique maps.
+_FREEFORM_FIELDS = {"outfit_description", "held_item"}
 
 
 def _options(field: str) -> set[str]:
@@ -158,6 +160,10 @@ def validate() -> list[str]:
                 errors.append(f"cosplayer '{name}': covers_face entry missing 'mask' text")
         elif mask is not None:
             errors.append(f"cosplayer '{name}': 'mask' set but covers_face is not True")
+        # An optional signature prop is free-text; if present it must be a string.
+        prop = entry.get("prop")
+        if prop is not None and (not isinstance(prop, str) or not prop):
+            errors.append(f"cosplayer '{name}': 'prop' must be a non-empty string")
         # signature is applied in both modes; physique only in Full character.
         # Every key must be a real field and every value a valid option for it.
         for section in ("signature", "physique"):
@@ -171,6 +177,15 @@ def validate() -> list[str]:
                         errors.append(f"cosplayer '{name}': age={value!r} is not a valid option")
                 elif value not in _options(field):
                     errors.append(f"cosplayer '{name}': {section}.{field}={value!r} is not a valid option")
+
+    # --- studio backdrops: must be real location options -------------
+    # The engine matches the resolved location against STUDIO_BACKDROPS by exact
+    # string, so any entry missing from the location pool would silently break the
+    # "Studio / solid backdrop" filter.
+    location_options = _options("location")
+    missing_backdrops = [b for b in STUDIO_BACKDROPS if b not in location_options]
+    if missing_backdrops:
+        errors.append(f"STUDIO_BACKDROPS not in location options: {sorted(missing_backdrops)}")
 
     # --- skin-tone affinity maps -------------------------------------
     skin_options = _options("skin_tone")

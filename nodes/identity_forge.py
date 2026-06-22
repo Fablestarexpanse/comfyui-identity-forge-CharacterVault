@@ -29,13 +29,13 @@ from typing import Any
 try:
     from ..data.fields import (
         FIELD_DEFINITIONS, OUTFIT_DESCRIPTIONS, SKIN_TONE_BANDS, ETHNICITY_REGION,
-        OUTDOOR_LOCATIONS,
+        OUTDOOR_LOCATIONS, STUDIO_BACKDROPS,
     )
     from ..data.constraints import CONSTRAINT_RULES
 except ImportError:  # pragma: no cover — standalone/test context
     from data.fields import (
         FIELD_DEFINITIONS, OUTFIT_DESCRIPTIONS, SKIN_TONE_BANDS, ETHNICITY_REGION,
-        OUTDOOR_LOCATIONS,
+        OUTDOOR_LOCATIONS, STUDIO_BACKDROPS,
     )
     from data.constraints import CONSTRAINT_RULES
 
@@ -54,7 +54,11 @@ except ImportError:  # pragma: no cover — exercised only outside ComfyUI
 # ---------------------------------------------------------------------------
 
 #: Fields that never get a user-facing widget (engine-generated).
-_HIDDEN_FIELDS: frozenset[str] = frozenset({"outfit_description"})
+_HIDDEN_FIELDS: frozenset[str] = frozenset({"outfit_description", "held_item"})
+
+#: Hidden fields that are nonetheless honoured as preset-supplied locks (a costume
+#: override and a cosplayer's signature prop). Everything else hidden is engine-only.
+_PRESET_HIDDEN_FIELDS: frozenset[str] = frozenset({"outfit_description", "held_item"})
 
 #: ``set_all_fields`` control values. "All to None" omits every field still on
 #: "Random" (a blank-slate baseline) so only locked fields appear; a wired
@@ -243,11 +247,17 @@ def _build_option_pool(
         base = [c for c in base if c in natural]
 
     if field_name == "location":
-        setting = resolved.get("location_setting", "Any")
-        if setting == "Indoor":
-            base = [loc for loc in base if loc not in OUTDOOR_LOCATIONS]
+        setting = resolved.get("location_setting", "Any indoor/outdoor")
+        if setting == "Studio / solid backdrop":
+            base = [loc for loc in base if loc in STUDIO_BACKDROPS]
+        elif setting == "Indoor":
+            # Indoor real locations only — never an outdoor scene or a studio sweep.
+            base = [loc for loc in base if loc not in OUTDOOR_LOCATIONS
+                    and loc not in STUDIO_BACKDROPS]
         elif setting == "Outdoor":
             base = [loc for loc in base if loc in OUTDOOR_LOCATIONS]
+        else:  # "Any indoor/outdoor" (default): every real location, never a studio
+            base = [loc for loc in base if loc not in STUDIO_BACKDROPS]
 
     return base
 
@@ -597,9 +607,16 @@ def _format_prose(
     if clothing:
         sentences.append(", ".join(clothing))
 
-    # --- Pose -----------------------------------------------------------
-    if g("pose"):
-        sentences.append(f"{subj} {is_v} {g('pose')}")
+    # --- Pose & held item ----------------------------------------------
+    # held_item is a hidden, preset-only field (a cosplayer's signature prop);
+    # voiced here as "holding <value>", folded into the pose sentence when present.
+    pose, held = g("pose"), g("held_item")
+    if pose and held:
+        sentences.append(f"{subj} {is_v} {pose}, holding {held}")
+    elif pose:
+        sentences.append(f"{subj} {is_v} {pose}")
+    elif held:
+        sentences.append(f"{subj} {is_v} holding {held}")
 
     # --- Setting & shot -------------------------------------------------
     scene = []
@@ -755,7 +772,7 @@ def generate_character(
     hair_color_scope: str = "Natural only",
     wardrobe: str = "Match gender",
     accessory_density: str = "Balanced",
-    location_setting: str = "Any",
+    location_setting: str = "Any indoor/outdoor",
     cosplay_label: str | None = None,
     covers_face: bool = False,
     modifiers: dict[str, str] | None = None,
@@ -786,7 +803,7 @@ def generate_character(
         if name in FIELD_DEFINITIONS
         and name not in _CONTROL_FIELDS
         and value != "Random"
-        and (name not in _HIDDEN_FIELDS or name == "outfit_description")
+        and (name not in _HIDDEN_FIELDS or name in _PRESET_HIDDEN_FIELDS)
     }
 
     # The gender gate must hold for *injected* locks too. An archetype emits
@@ -823,6 +840,16 @@ def generate_character(
     else:
         for field in ("outfit_style", "footwear", "clothing_color", "clothing_pattern"):
             resolved.pop(field, None)
+
+    # A studio / solid backdrop wants clean, even studio light — a scene-specific
+    # value ("neon-lit street", "dappled forest canopy") on a green screen reads
+    # wrong and defeats the easy-masking intent. When the resolved location is a
+    # backdrop and lighting was not explicitly locked, neutralize it. Scope is kept
+    # to lighting (the one strong scene-tell); an explicit lighting lock still wins.
+    if (resolved.get("location") in STUDIO_BACKDROPS
+            and "lighting" not in locked_clean
+            and not _is_absent(resolved.get("lighting"))):
+        resolved["lighting"] = "soft studio three-point lighting"
 
     # A full mask / helmet hides the face: drop the now-irrelevant face, hair and
     # makeup fields so neither prose nor JSON describes a face that contradicts
@@ -995,10 +1022,13 @@ if _COMFY_AVAILABLE:
                 ),
                 io.Combo.Input(
                     "location_setting",
-                    options=["Any", "Indoor", "Outdoor"],
-                    default="Any",
-                    tooltip="Restrict the random location to indoor or outdoor scenes "
-                            "(or leave 'Any'). A locked location overrides this.",
+                    options=["Any indoor/outdoor", "Indoor", "Outdoor", "Studio / solid backdrop"],
+                    default="Any indoor/outdoor",
+                    tooltip="Restrict the random location. 'Any indoor/outdoor' (default) "
+                            "picks any real scene but never a studio. 'Studio / solid "
+                            "backdrop' forces a plain, easily-maskable background (grey, "
+                            "white, black, or chroma-key green screen) and a clean studio "
+                            "light. A locked location overrides this.",
                 ),
                 io.Combo.Input(
                     "set_all_fields",
@@ -1082,7 +1112,7 @@ if _COMFY_AVAILABLE:
             hair_color_scope = kwargs.get("hair_color_scope", "Natural only")
             wardrobe = kwargs.get("wardrobe", "Match gender")
             accessory_density = kwargs.get("accessory_density", "Balanced")
-            location_setting = kwargs.get("location_setting", "Any")
+            location_setting = kwargs.get("location_setting", "Any indoor/outdoor")
 
             # Locked fields: the wired character's values, overridden by explicit
             # widgets. The 'set_all_fields' reset turns every untouched field into
