@@ -1,27 +1,23 @@
 /**
  * Identity Forge — Vault Preview extension.
  *
- * When a character is selected in the IdentityForgeVaultLoad node's dropdown,
- * the saved image is loaded and displayed directly inside the node body
- * (the same way ComfyUI's built-in PreviewImage node shows results).
+ * Adds to the IdentityForgeVaultLoad node:
  *
- * Selecting "(no characters saved)" or a missing entry clears the preview.
- * The preview also restores automatically when a saved workflow is reloaded.
+ * 1. **Inline preview** — when a character is selected the saved image loads
+ *    into the node body immediately (before the workflow runs).
  *
- * No floating overlays, no MutationObservers — everything is scoped to the
- * node's own drawing callbacks.
+ * 2. **Refresh button** — fetches the current vault list from the backend and
+ *    updates the character dropdown without restarting ComfyUI.
  */
 
 import { app } from "../../scripts/app.js";
 
 const NONE_SENTINEL = "(no characters saved)";
-const PREVIEW_URL = (name) =>
-  `/identity_forge/vault/preview/${encodeURIComponent(name)}`;
+const PREVIEW_URL   = (name) => `/identity_forge/vault/preview/${encodeURIComponent(name)}`;
+const REFRESH_URL   = "/identity_forge/vault/characters";
 
-/**
- * Load the image for *characterName* and attach it to *node* via node.imgs.
- * ComfyUI's built-in drawing code takes it from there.
- */
+// ── Inline node image preview ─────────────────────────────────────────────
+
 function setNodePreview(node, characterName) {
   try {
     if (!characterName || characterName === NONE_SENTINEL) {
@@ -38,14 +34,11 @@ function setNodePreview(node, characterName) {
         node.imgs = [img];
         node.setSizeForImage?.();
         node.setDirtyCanvas?.(true, true);
-      } catch (_) {
-        // Silently ignore — never break the canvas render loop.
-      }
+      } catch (_) {}
     };
 
     img.onerror = () => {
       try {
-        // Image missing or route not yet available — clear any stale preview.
         node.imgs = null;
         node.setSizeForImage?.(true);
         node.setDirtyCanvas?.(true, true);
@@ -53,10 +46,10 @@ function setNodePreview(node, characterName) {
     };
 
     img.src = PREVIEW_URL(characterName);
-  } catch (_) {
-    // Defensive catch so nothing here can throw into ComfyUI's extension loader.
-  }
+  } catch (_) {}
 }
+
+// ── Extension ─────────────────────────────────────────────────────────────
 
 app.registerExtension({
   name: "identity_forge.vault_preview",
@@ -77,27 +70,45 @@ app.registerExtension({
           const charWidget = node.widgets?.find((w) => w.name === "character");
           if (!charWidget) return;
 
-          // Update the inline preview whenever the dropdown value changes.
+          // Update inline preview whenever the dropdown value changes.
           const origCallback = charWidget.callback;
           charWidget.callback = function (value) {
-            try {
-              if (origCallback) origCallback.apply(this, arguments);
-            } catch (_) {}
+            try { if (origCallback) origCallback.apply(this, arguments); } catch (_) {}
             setNodePreview(node, value);
           };
 
-          // Restore preview when a workflow is loaded (widget already has a value).
-          // Small delay so the node finishes sizing itself first.
+          // ── Refresh button ───────────────────────────────────────────────
+          node.addWidget(
+            "button",
+            "↺  Refresh Character List",
+            null,
+            () => {
+              fetch(REFRESH_URL)
+                .then((r) => r.json())
+                .then((names) => {
+                  if (!Array.isArray(names) || names.length === 0) return;
+                  charWidget.options.values = names;
+                  // Keep current selection if still valid, else pick first.
+                  if (!names.includes(charWidget.value)) {
+                    charWidget.value = names[0];
+                    setNodePreview(node, names[0]);
+                  }
+                  node.setDirtyCanvas?.(true, true);
+                })
+                .catch((err) => {
+                  console.warn("[IdentityForge Vault] Refresh failed:", err);
+                });
+            },
+            { serialize: false },
+          );
+
+          // Show preview for the current (default / workflow-restored) value.
           const initial = charWidget.value;
           if (initial && initial !== NONE_SENTINEL) {
             setTimeout(() => setNodePreview(node, initial), 50);
           }
-        } catch (_) {
-          // Don't break node creation if something above throws.
-        }
+        } catch (_) {}
       };
-    } catch (_) {
-      // Don't break extension loading.
-    }
+    } catch (_) {}
   },
 });

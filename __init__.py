@@ -23,38 +23,67 @@ from comfy_api.latest import ComfyExtension, io
 # Vault image preview route — serves saved character PNGs so the JS frontend
 # can show an inline preview inside the node without running the workflow.
 # ---------------------------------------------------------------------------
-def _register_vault_preview_route() -> None:
-    """Register the vault preview route on the ComfyUI PromptServer.
+def _register_vault_routes() -> None:
+    """Register vault HTTP routes on the ComfyUI PromptServer.
 
     Wrapped in a function so any failure is fully isolated — a broken route
     must never prevent the node pack from loading.
+
+    Routes registered:
+    - GET /identity_forge/vault/preview/{character_name}  → serves image.png
+    - GET /identity_forge/vault/characters                → JSON list of names
     """
     try:
+        import os as _os
         from pathlib import Path
         from aiohttp import web
         from server import PromptServer  # type: ignore[import-not-found]
 
         try:
             import folder_paths as _fp
-            _vault_dir: Path = Path(_fp.get_output_directory()) / "character_vault"
+            _vault_dir: Path = Path(_fp.get_output_directory()) / "Characters"
         except Exception:
-            _vault_dir = Path(__file__).resolve().parent / "vault"
+            _vault_dir = Path(__file__).resolve().parent / "Characters"
+
+        _SENTINEL = "(no characters saved)"
 
         @PromptServer.instance.routes.get("/identity_forge/vault/preview/{character_name}")
         async def _vault_preview(request: web.Request) -> web.Response:
+            """Serve the saved PNG for one character (used by the inline node preview in JS)."""
             name = request.match_info["character_name"]
             img_path = _vault_dir / name / "image.png"
             if not img_path.exists():
                 raise web.HTTPNotFound()
-            return web.FileResponse(
-                img_path,
-                headers={"Cache-Control": "no-cache"},
-            )
+            return web.FileResponse(img_path, headers={"Cache-Control": "no-cache"})
+
+        @PromptServer.instance.routes.get("/identity_forge/vault/characters")
+        async def _vault_characters(request: web.Request) -> web.Response:
+            """Return current vault character names as a JSON array.
+
+            Used by the Refresh button on the Load node to update the dropdown
+            without restarting ComfyUI.
+            """
+            try:
+                if not _vault_dir.is_dir():
+                    return web.json_response([_SENTINEL])
+                names = sorted(
+                    [
+                        e.name for e in _os.scandir(_vault_dir)
+                        if e.is_dir()
+                        and (_vault_dir / e.name / "image.png").exists()
+                        and (_vault_dir / e.name / "character.json").exists()
+                    ],
+                    key=str.casefold,
+                )
+                return web.json_response(names if names else [_SENTINEL])
+            except Exception:
+                return web.json_response([_SENTINEL])
+
     except Exception:
         pass  # Not running inside ComfyUI, or PromptServer not yet ready
 
 
-_register_vault_preview_route()
+_register_vault_routes()
 
 # ---------------------------------------------------------------------------
 # Node imports

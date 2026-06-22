@@ -1,20 +1,14 @@
 """IdentityForgeVaultLoad node — reload a saved character from the vault.
 
-Select a character that was previously saved with
-:class:`~nodes.identity_forge_vault_save.IdentityForgeVaultSave`.  The node
-outputs:
+Select a character saved with :class:`~nodes.identity_forge_vault_save.IdentityForgeVaultSave`.
+Outputs:
 
-* ``character_json`` — the stored ``prompt_json``, ready to wire directly into
-  an Identity Forge node's ``archetype_json`` input.  Every field is locked to
-  its saved value, so the same character is reproduced exactly.
-* ``image`` — the reference render that was saved alongside the JSON.
+* ``character_json`` — wire to an Identity Forge node's ``archetype_json`` to
+  reproduce the character exactly (every field locked to its saved value).
+* ``image`` — the reference render saved alongside the JSON.
+* ``prompt_text`` — the natural-language prose saved alongside the JSON.
 
-Wire ``character_json`` → ``archetype_json`` on Identity Forge, then queue
-with a fixed seed to get a pixel-identical result, or with a randomised seed
-to re-generate the same *character* with a new *image* (same face / outfit,
-fresh composition and lighting randomisation from any still-unlocked fields).
-
-Click **Refresh** in the ComfyUI node editor after saving new characters to
+Click **↺ Refresh Character List** on the node after saving new characters to
 update the dropdown without restarting ComfyUI.
 
 The engine halves (:func:`_get_vault_names`, :func:`load_character`) are pure
@@ -29,9 +23,9 @@ from typing import Any
 # Resolve the vault root at import time.
 try:
     import folder_paths as _fp
-    _VAULT_DIR: Path = Path(_fp.get_output_directory()) / "character_vault"
+    _VAULT_DIR: Path = Path(_fp.get_output_directory()) / "Characters"
 except ImportError:  # pragma: no cover — standalone/test context
-    _VAULT_DIR = Path(__file__).resolve().parents[2] / "vault"
+    _VAULT_DIR = Path(__file__).resolve().parents[2] / "Characters"
 
 try:
     from comfy_api.latest import io  # type: ignore[import-not-found]
@@ -49,11 +43,7 @@ _NONE_SENTINEL = "(no characters saved)"
 # ---------------------------------------------------------------------------
 
 def _black_image_tensor() -> Any:
-    """Return a 1×1 black RGB float32 tensor with shape ``(1, 1, 1, 3)``.
-
-    Used as a safe no-op image when no character is selected or the saved
-    image cannot be read.
-    """
+    """Return a 1×1 black RGB float32 tensor with shape ``(1, 1, 1, 3)``."""
     import torch
     return torch.zeros((1, 1, 1, 3), dtype=torch.float32)
 
@@ -61,14 +51,8 @@ def _black_image_tensor() -> Any:
 def _get_vault_names(vault_dir: Path | None = None) -> list[str]:
     """Return a sorted list of saved character names from the vault directory.
 
-    A valid character entry is a subdirectory of *vault_dir* that contains
-    both ``image.png`` and ``character.json``.  Returns
-    ``[_NONE_SENTINEL]`` when the vault is empty, does not yet exist, or
-    cannot be read.
-
-    This function is passed (without calling it) as the ``options`` callable
-    for :class:`io.Combo.Input` so ComfyUI calls it on each frontend refresh.
-    It must be defined at module level (not as a lambda) for picklability.
+    A valid entry is a subdirectory containing both ``image.png`` and
+    ``character.json``.  Returns ``[_NONE_SENTINEL]`` when empty or on error.
     """
     root = vault_dir if vault_dir is not None else _VAULT_DIR
     try:
@@ -89,35 +73,22 @@ def _get_vault_names(vault_dir: Path | None = None) -> list[str]:
 def load_character(
     character_name: str,
     vault_dir: Path | None = None,
-) -> tuple[Any, str]:
-    """Load the image and JSON for *character_name* from the vault.
-
-    Parameters
-    ----------
-    character_name:
-        The name as it appears in the dropdown (i.e. the folder name on disk).
-        Passing :data:`_NONE_SENTINEL` returns the fallback immediately.
-    vault_dir:
-        Override the vault root (used by tests).
+) -> tuple[Any, str, str]:
+    """Load image, JSON and prompt text for *character_name* from the vault.
 
     Returns
     -------
-    (image_tensor, character_json)
-        ``image_tensor`` has shape ``(1, H, W, 3)``, float32 in ``[0, 1]``.
-        ``character_json`` is the raw string from ``character.json``, ready
-        to wire into an Identity Forge node's ``archetype_json`` input.
-
-        Falls back to ``(_black_image_tensor(), "{}")`` on sentinel, missing
-        files, or any read error.  If the JSON loads but the image is corrupt,
-        returns the JSON with a black placeholder image so the character data
-        is not lost.
+    (image_tensor, character_json, prompt_text)
+        Falls back gracefully: sentinel → black tensor + empty strings;
+        missing image → black tensor but JSON/text still returned;
+        missing prompt.txt (older saves) → empty string for prompt_text.
     """
     import numpy as np
     import torch
     from PIL import Image
 
     if character_name == _NONE_SENTINEL:
-        return _black_image_tensor(), "{}"
+        return _black_image_tensor(), "{}", ""
 
     root = vault_dir if vault_dir is not None else _VAULT_DIR
     char_dir = root / character_name
@@ -129,9 +100,16 @@ def load_character(
     except (FileNotFoundError, OSError) as exc:
         print(f"[IdentityForgeVaultLoad] Could not read character.json for "
               f"'{character_name}': {exc}")
-        return _black_image_tensor(), "{}"
+        return _black_image_tensor(), "{}", ""
 
-    # Load image (best-effort; missing image doesn't discard the JSON).
+    # Load prompt text (best-effort; older saves may not have it).
+    text_path = char_dir / "prompt.txt"
+    try:
+        prompt_text = text_path.read_text(encoding="utf-8")
+    except (FileNotFoundError, OSError):
+        prompt_text = ""
+
+    # Load image (best-effort; missing image doesn't discard the JSON/text).
     img_path = char_dir / "image.png"
     try:
         pil_img = Image.open(img_path).convert("RGB")
@@ -142,7 +120,7 @@ def load_character(
               f"'{character_name}': {exc}")
         image_tensor = _black_image_tensor()
 
-    return image_tensor, character_json
+    return image_tensor, character_json, prompt_text
 
 
 # ---------------------------------------------------------------------------
@@ -163,30 +141,26 @@ if _COMFY_AVAILABLE:
                 description=(
                     "Load a character saved by Identity Forge Vault Save. Wire "
                     "'character_json' into an Identity Forge node's 'archetype_json' "
-                    "input to reproduce the character exactly — every field is locked to "
-                    "its saved value. Click Refresh in the node editor to pick up "
-                    "characters saved during this session."
+                    "input to reproduce the character exactly. Use the Refresh button "
+                    "on the node to pick up characters saved in this session."
                 ),
                 inputs=[
                     io.Combo.Input(
                         "character",
-                        options=_get_vault_names(),  # evaluated at startup; restart to see new saves
+                        options=_get_vault_names(),
                         default=_NONE_SENTINEL,
-                        tooltip=(
-                            "Select a saved character. Restart ComfyUI (or use "
-                            "Refresh in ComfyUI Manager) after saving new characters "
-                            "to see them here."
-                        ),
+                        tooltip="Select a saved character. Use the Refresh button to update this list.",
                     ),
                 ],
                 outputs=[
                     io.String.Output(display_name="character_json"),
                     io.Image.Output(display_name="image"),
+                    io.String.Output(display_name="prompt_text"),
                 ],
             )
 
         @classmethod
         def execute(cls, **kwargs: Any) -> "io.NodeOutput":
             character_name = kwargs.get("character", _NONE_SENTINEL)
-            image_tensor, character_json = load_character(character_name)
-            return io.NodeOutput(character_json, image_tensor)
+            image_tensor, character_json, prompt_text = load_character(character_name)
+            return io.NodeOutput(character_json, image_tensor, prompt_text)
