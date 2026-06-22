@@ -1,16 +1,17 @@
 """IdentityForgeVaultSave node — persist a generated character to the vault.
 
-After Identity Forge produces a character you want to keep, wire its
-``prompt_text``, ``prompt_json`` outputs and the decoded image into this node.
-It saves all three to a named folder inside the Characters vault and passes
-everything through unchanged so the rest of your workflow continues
-uninterrupted.
+Wire the image, prompt_text, prompt_json from Identity Forge and the seed
+value that drove the generation into this node. Each save is filed under its
+seed number so every entry is unique and you always know which seed produced it.
 
-Saved characters can be reloaded later via :class:`IdentityForgeVaultLoad`.
+When **Enabled** the node saves to disk on every queue run.
+When **Disabled** it passes all inputs through untouched without writing
+anything — useful when you find a character you like and want to keep
+generating without overwriting the saved entry.
 
 The vault lives at::
 
-    {ComfyUI output directory}/Characters/{character name}/
+    {ComfyUI output directory}/Characters/{seed}/
         image.png
         character.json
         prompt.txt
@@ -21,63 +22,40 @@ ComfyUI.
 from __future__ import annotations
 
 import os
-import re
 from pathlib import Path
 from typing import Any
 
-# Resolve the vault root at import time. folder_paths is the ComfyUI API;
-# fall back to a sibling "Characters" directory when running standalone.
 try:
     import folder_paths as _fp
     _VAULT_DIR: Path = Path(_fp.get_output_directory()) / "Characters"
-except ImportError:  # pragma: no cover — standalone/test context
+except ImportError:  # pragma: no cover
     _VAULT_DIR = Path(__file__).resolve().parents[2] / "Characters"
 
 try:
     from comfy_api.latest import io  # type: ignore[import-not-found]
     _COMFY_AVAILABLE: bool = True
-except ImportError:  # pragma: no cover — exercised only outside ComfyUI
+except ImportError:  # pragma: no cover
     _COMFY_AVAILABLE = False
+
+_ENABLED  = "Enabled"
+_DISABLED = "Disabled"
 
 
 # ---------------------------------------------------------------------------
 # Engine (pure, no ComfyUI dependency)
 # ---------------------------------------------------------------------------
 
-def _sanitize_name(name: str) -> str:
-    """Return a filesystem-safe version of *name*.
-
-    Strips characters that are illegal on Windows/macOS/Linux
-    (``< > : " / \\ | ? *`` and ASCII control chars), collapses runs of
-    whitespace to a single space, and strips leading/trailing whitespace.
-
-    Raises :class:`ValueError` if the sanitized result is empty.
-    """
-    # Exclude \x09 (tab), \x0a (LF), \x0d (CR) from the control-char strip so
-    # they survive to the whitespace-collapse step and become spaces.
-    safe = re.sub(r'[<>:"/\\|?*\x00-\x08\x0b\x0c\x0e-\x1f]', "", name)
-    safe = re.sub(r"\s+", " ", safe).strip()
-    if not safe:
-        raise ValueError(
-            f"Character name {name!r} contains only illegal characters and "
-            "cannot be used as a folder name."
-        )
-    return safe
-
-
 def save_character(
     image_tensor: Any,
     prompt_json: str,
     prompt_text: str,
-    character_name: str,
+    seed: int,
     vault_dir: Path | None = None,
 ) -> tuple[Any, str, str]:
-    """Save image, JSON and prose text to the vault; return all three unchanged.
+    """Save image, JSON and prose for *seed* to the vault; return all three unchanged.
 
-    Creates inside ``{vault_dir}/{safe_name}/``:
-    - ``image.png``     — the rendered character image
-    - ``character.json`` — the full field JSON (feeds back as archetype_json)
-    - ``prompt.txt``    — the natural-language prose for reference
+    The vault subfolder is named after *seed* so it is unique per generation
+    and instantly identifies which seed produced the character.
 
     Parameters
     ----------
@@ -85,26 +63,24 @@ def save_character(
         ComfyUI IMAGE tensor — shape ``(B, H, W, C)``, float32 in ``[0, 1]``.
         Only the first frame (``[0]``) is saved.
     prompt_json:
-        The ``prompt_json`` string from an Identity Forge node.
+        The ``prompt_json`` string from Identity Forge.
     prompt_text:
-        The ``prompt_text`` prose string from an Identity Forge node.
-    character_name:
-        Human-readable label for this character; used as the vault subfolder
-        name after sanitization.
+        The ``prompt_text`` prose from Identity Forge.
+    seed:
+        The generation seed. Used as the folder name.
     vault_dir:
         Override the vault root (used by tests).
 
     Returns
     -------
-    (image_tensor, prompt_json, prompt_text)
-        The inputs, unchanged, for downstream workflow nodes.
+    (image_tensor, prompt_json, prompt_text) unchanged.
     """
     import numpy as np
     from PIL import Image
 
-    safe_name = _sanitize_name(character_name)
+    folder_name = str(seed)
     root = vault_dir if vault_dir is not None else _VAULT_DIR
-    char_dir = root / safe_name
+    char_dir = root / folder_name
 
     os.makedirs(char_dir, exist_ok=True)
 
@@ -113,11 +89,10 @@ def save_character(
     text_path = char_dir / "prompt.txt"
 
     if img_path.exists():
-        print(f"[IdentityForgeVaultSave] Overwriting existing character '{safe_name}'.")
+        print(f"[IdentityForgeVaultSave] Overwriting seed {seed}.")
     else:
-        print(f"[IdentityForgeVaultSave] Saving new character '{safe_name}'.")
+        print(f"[IdentityForgeVaultSave] Saving seed {seed}.")
 
-    # Convert tensor frame → uint8 numpy → PIL → PNG.
     try:
         img_np = (image_tensor[0].cpu().numpy() * 255).astype(np.uint8)
         pil_img = Image.fromarray(img_np)
@@ -126,7 +101,7 @@ def save_character(
         pil_img.save(img_path)
     except Exception as exc:
         raise RuntimeError(
-            f"[IdentityForgeVaultSave] Failed to save image for '{safe_name}': {exc}"
+            f"[IdentityForgeVaultSave] Failed to save image for seed {seed}: {exc}"
         ) from exc
 
     try:
@@ -134,7 +109,7 @@ def save_character(
         text_path.write_text(prompt_text, encoding="utf-8")
     except OSError as exc:
         raise RuntimeError(
-            f"[IdentityForgeVaultSave] Failed to write files for '{safe_name}': {exc}"
+            f"[IdentityForgeVaultSave] Failed to write files for seed {seed}: {exc}"
         ) from exc
 
     print(f"[IdentityForgeVaultSave] Saved to: {char_dir}")
@@ -148,7 +123,7 @@ def save_character(
 if _COMFY_AVAILABLE:
 
     class IdentityForgeVaultSave(io.ComfyNode):  # type: ignore[misc, valid-type]
-        """Save a generated character image, JSON and prompt text to the vault."""
+        """Save a generated character to the vault, named by its seed."""
 
         @classmethod
         def define_schema(cls) -> "io.Schema":
@@ -157,12 +132,23 @@ if _COMFY_AVAILABLE:
                 display_name="Identity Forge Vault Save",
                 category="conditioning/character",
                 description=(
-                    "Save the generated image, prompt_json and prompt_text from an "
-                    "Identity Forge node to the Characters vault on disk. All outputs "
-                    "pass through unchanged so this node sits inline in your workflow. "
-                    "Reload saved characters with Identity Forge Vault Load."
+                    "Save the generated image, prompt_text and prompt_json to the "
+                    "Characters vault, filed under the seed number so every entry is "
+                    "unique and traceable. Set to Disabled to keep running without "
+                    "overwriting the saved character."
                 ),
                 inputs=[
+                    io.Combo.Input(
+                        "enabled",
+                        options=[_ENABLED, _DISABLED],
+                        default=_ENABLED,
+                        tooltip=(
+                            "Enabled: save on every run. "
+                            "Disabled: pass inputs through without writing anything — "
+                            "useful when you want to keep generating after locking a "
+                            "character you like."
+                        ),
+                    ),
                     io.Image.Input(
                         "image",
                         tooltip="Connect to the image output of your VAEDecode node.",
@@ -170,23 +156,22 @@ if _COMFY_AVAILABLE:
                     io.String.Input(
                         "prompt_text",
                         force_input=True,
-                        tooltip="Connect to the prompt_text output of an Identity Forge node.",
+                        tooltip="Connect to the prompt_text output of Identity Forge.",
                     ),
                     io.String.Input(
                         "prompt_json",
                         force_input=True,
-                        tooltip=(
-                            "Connect to the prompt_json output of an Identity Forge node. "
-                            "This JSON is saved verbatim and fed back as archetype_json "
-                            "when the character is reloaded, locking every field exactly."
-                        ),
+                        tooltip="Connect to the prompt_json output of Identity Forge.",
                     ),
-                    io.String.Input(
-                        "character_name",
-                        default="My Character",
+                    io.Int.Input(
+                        "seed",
+                        default=0,
+                        min=0,
+                        max=0xFFFFFFFFFFFFFFFF,
                         tooltip=(
-                            "Name for this character in the vault. Saving with the same "
-                            "name overwrites the previous entry."
+                            "The seed that produced this character. Wire a Primitive "
+                            "node here and to Identity Forge's seed so they always match. "
+                            "The seed becomes the folder name in the vault."
                         ),
                     ),
                 ],
@@ -199,14 +184,18 @@ if _COMFY_AVAILABLE:
 
         @classmethod
         def execute(cls, **kwargs: Any) -> "io.NodeOutput":
-            image        = kwargs["image"]
-            prompt_text  = kwargs.get("prompt_text", "")
-            prompt_json  = kwargs.get("prompt_json", "{}")
-            character_name = kwargs.get("character_name", "My Character").strip() or "My Character"
+            enabled     = kwargs.get("enabled", _ENABLED)
+            image       = kwargs["image"]
+            prompt_text = kwargs.get("prompt_text", "")
+            prompt_json = kwargs.get("prompt_json", "{}")
+            seed        = int(kwargs.get("seed", 0))
+
+            if enabled == _DISABLED:
+                return io.NodeOutput(image, prompt_text, prompt_json)
 
             try:
                 image_out, json_out, text_out = save_character(
-                    image, prompt_json, prompt_text, character_name
+                    image, prompt_json, prompt_text, seed
                 )
             except (ValueError, RuntimeError) as exc:
                 print(f"[IdentityForgeVaultSave] {exc}")

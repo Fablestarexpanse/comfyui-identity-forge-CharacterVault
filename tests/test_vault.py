@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from nodes.identity_forge_vault_save import _sanitize_name, save_character
+from nodes.identity_forge_vault_save import save_character
 from nodes.identity_forge_vault_load import (
     _NONE_SENTINEL, _get_vault_names, load_character,
 )
@@ -77,43 +77,6 @@ def _make_vault_entry(
     img.save(char_dir / "image.png")
     (char_dir / "character.json").write_text(json_str, encoding="utf-8")
     (char_dir / "prompt.txt").write_text(text_str, encoding="utf-8")
-
-
-# ---------------------------------------------------------------------------
-# _sanitize_name tests
-# ---------------------------------------------------------------------------
-
-class SanitizeNameTests(unittest.TestCase):
-    def test_clean_name_unchanged(self):
-        self.assertEqual(_sanitize_name("Aria Storm"), "Aria Storm")
-
-    def test_strips_illegal_windows_chars(self):
-        result = _sanitize_name('My:Char<ac/ter">|?*')
-        for ch in '<>:"/\\|?*':
-            self.assertNotIn(ch, result)
-
-    def test_strips_control_chars(self):
-        result = _sanitize_name("Good\x00Name\x1f")
-        self.assertEqual(result, "GoodName")
-
-    def test_collapses_whitespace(self):
-        self.assertEqual(_sanitize_name("Two  Spaces"), "Two Spaces")
-        self.assertEqual(_sanitize_name("Tab\there"), "Tab here")
-
-    def test_strips_leading_trailing_whitespace(self):
-        self.assertEqual(_sanitize_name("  padded  "), "padded")
-
-    def test_empty_after_sanitize_raises(self):
-        with self.assertRaises(ValueError):
-            _sanitize_name("???")
-
-    def test_fully_empty_raises(self):
-        with self.assertRaises(ValueError):
-            _sanitize_name("")
-
-    def test_only_spaces_raises(self):
-        with self.assertRaises(ValueError):
-            _sanitize_name("   ")
 
 
 # ---------------------------------------------------------------------------
@@ -176,36 +139,50 @@ class SaveCharacterTests(unittest.TestCase):
     def test_creates_all_three_files(self):
         with tempfile.TemporaryDirectory() as tmp:
             vault = Path(tmp) / "vault"
-            save_character(_make_fake_tensor(), '{"test": true}', "A woman.", "TestChar", vault_dir=vault)
-            self.assertTrue((vault / "TestChar" / "image.png").exists())
-            self.assertTrue((vault / "TestChar" / "character.json").exists())
-            self.assertTrue((vault / "TestChar" / "prompt.txt").exists())
+            save_character(_make_fake_tensor(), '{"test": true}', "A woman.", seed=42, vault_dir=vault)
+            self.assertTrue((vault / "42" / "image.png").exists())
+            self.assertTrue((vault / "42" / "character.json").exists())
+            self.assertTrue((vault / "42" / "prompt.txt").exists())
+
+    def test_folder_named_by_seed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault = Path(tmp) / "vault"
+            save_character(_make_fake_tensor(), "{}", "", seed=99999, vault_dir=vault)
+            self.assertTrue((vault / "99999").is_dir())
 
     def test_json_stored_verbatim(self):
         with tempfile.TemporaryDirectory() as tmp:
             vault = Path(tmp) / "vault"
             payload = json.dumps({"_meta": {"gender": "Female"}, "Demographics": {"age": "30"}})
-            save_character(_make_fake_tensor(), payload, "", "VerbatimTest", vault_dir=vault)
-            stored = (vault / "VerbatimTest" / "character.json").read_text(encoding="utf-8")
+            save_character(_make_fake_tensor(), payload, "", seed=1, vault_dir=vault)
+            stored = (vault / "1" / "character.json").read_text(encoding="utf-8")
             self.assertEqual(stored, payload)
 
     def test_prompt_text_stored(self):
         with tempfile.TemporaryDirectory() as tmp:
             vault = Path(tmp) / "vault"
             prose = "A tall Finnish woman with auburn hair."
-            save_character(_make_fake_tensor(), "{}", prose, "ProseTest", vault_dir=vault)
-            stored = (vault / "ProseTest" / "prompt.txt").read_text(encoding="utf-8")
+            save_character(_make_fake_tensor(), "{}", prose, seed=7, vault_dir=vault)
+            stored = (vault / "7" / "prompt.txt").read_text(encoding="utf-8")
             self.assertEqual(stored, prose)
 
-    def test_overwrites_existing_entry(self):
+    def test_overwrites_same_seed(self):
         with tempfile.TemporaryDirectory() as tmp:
             vault = Path(tmp) / "vault"
-            save_character(_make_fake_tensor(), '{"version": 1}', "v1", "OW", vault_dir=vault)
-            save_character(_make_fake_tensor(), '{"version": 2}', "v2", "OW", vault_dir=vault)
-            stored_json = (vault / "OW" / "character.json").read_text(encoding="utf-8")
-            stored_text = (vault / "OW" / "prompt.txt").read_text(encoding="utf-8")
+            save_character(_make_fake_tensor(), '{"version": 1}', "v1", seed=5, vault_dir=vault)
+            save_character(_make_fake_tensor(), '{"version": 2}', "v2", seed=5, vault_dir=vault)
+            stored_json = (vault / "5" / "character.json").read_text(encoding="utf-8")
+            stored_text = (vault / "5" / "prompt.txt").read_text(encoding="utf-8")
             self.assertIn('"version": 2', stored_json)
             self.assertEqual(stored_text, "v2")
+
+    def test_different_seeds_create_separate_folders(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault = Path(tmp) / "vault"
+            save_character(_make_fake_tensor(), "{}", "", seed=10, vault_dir=vault)
+            save_character(_make_fake_tensor(), "{}", "", seed=20, vault_dir=vault)
+            self.assertTrue((vault / "10").is_dir())
+            self.assertTrue((vault / "20").is_dir())
 
     def test_returns_inputs_unchanged(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -214,24 +191,11 @@ class SaveCharacterTests(unittest.TestCase):
             json_str = '{"a": 1}'
             text_str = "A person."
             out_tensor, out_json, out_text = save_character(
-                tensor, json_str, text_str, "PassThrough", vault_dir=vault
+                tensor, json_str, text_str, seed=3, vault_dir=vault
             )
             self.assertIs(out_tensor, tensor)
             self.assertEqual(out_json, json_str)
             self.assertEqual(out_text, text_str)
-
-    def test_sanitizes_name_before_saving(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            vault = Path(tmp) / "vault"
-            save_character(_make_fake_tensor(), "{}", "", "My:Invalid<Name>", vault_dir=vault)
-            self.assertFalse((vault / "My:Invalid<Name>").exists())
-            self.assertEqual(len(list(vault.iterdir())), 1)
-
-    def test_invalid_name_raises(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            vault = Path(tmp) / "vault"
-            with self.assertRaises(ValueError):
-                save_character(_make_fake_tensor(), "{}", "", "???", vault_dir=vault)
 
 
 # ---------------------------------------------------------------------------
@@ -265,9 +229,9 @@ class LoadCharacterTests(unittest.TestCase):
             vault = Path(tmp) / "vault"
             payload = json.dumps({"_meta": {"gender": "Female"}, "Demographics": {"age": "28"}})
             prose = "A 28-year-old Japanese woman."
-            save_character(_make_fake_tensor(), payload, prose, "RoundTrip", vault_dir=vault)
+            save_character(_make_fake_tensor(), payload, prose, seed=42, vault_dir=vault)
 
-            _, loaded_json, loaded_text = load_character("RoundTrip", vault_dir=vault)
+            _, loaded_json, loaded_text = load_character("42", vault_dir=vault)
             self.assertEqual(loaded_json, payload)
             self.assertEqual(loaded_text, prose)
 
@@ -275,8 +239,8 @@ class LoadCharacterTests(unittest.TestCase):
     def test_round_trip_image_shape(self):
         with tempfile.TemporaryDirectory() as tmp:
             vault = Path(tmp) / "vault"
-            save_character(_make_fake_tensor(h=8, w=6), "{}", "", "ShapeTest", vault_dir=vault)
-            image_tensor, _, _ = load_character("ShapeTest", vault_dir=vault)
+            save_character(_make_fake_tensor(h=8, w=6), "{}", "", seed=1, vault_dir=vault)
+            image_tensor, _, _ = load_character("1", vault_dir=vault)
             self.assertEqual(image_tensor.shape[0], 1)
             self.assertEqual(image_tensor.shape[3], 3)
             self.assertGreater(image_tensor.shape[1], 0)

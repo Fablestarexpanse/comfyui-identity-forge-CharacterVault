@@ -36,6 +36,8 @@ except ImportError:  # pragma: no cover — exercised only outside ComfyUI
 
 #: Shown in the dropdown when the vault is empty or cannot be read.
 _NONE_SENTINEL = "(no characters saved)"
+_ENABLED  = "Enabled"
+_DISABLED = "Disabled"
 
 
 # ---------------------------------------------------------------------------
@@ -146,6 +148,15 @@ if _COMFY_AVAILABLE:
                 ),
                 inputs=[
                     io.Combo.Input(
+                        "enabled",
+                        options=[_ENABLED, _DISABLED],
+                        default=_ENABLED,
+                        tooltip=(
+                            "Enabled: load the selected character and lock its fields. "
+                            "Disabled: output empty values so Identity Forge randomizes freely."
+                        ),
+                    ),
+                    io.Combo.Input(
                         "character",
                         options=_get_vault_names(),
                         default=_NONE_SENTINEL,
@@ -161,6 +172,9 @@ if _COMFY_AVAILABLE:
 
         @classmethod
         def execute(cls, **kwargs: Any) -> "io.NodeOutput":
+            if kwargs.get("enabled", _ENABLED) == _DISABLED:
+                return io.NodeOutput("{}", _black_image_tensor(), "")
+
             character_name = kwargs.get("character", _NONE_SENTINEL)
             image_tensor, character_json, prompt_text = load_character(character_name)
             return io.NodeOutput(character_json, image_tensor, prompt_text)
