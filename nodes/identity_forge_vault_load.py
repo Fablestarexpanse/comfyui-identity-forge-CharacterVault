@@ -170,11 +170,12 @@ if _COMFY_AVAILABLE:
                 inputs=[
                     io.Combo.Input(
                         "character",
-                        options=_get_vault_names,
+                        options=_get_vault_names(),  # evaluated at startup; restart to see new saves
                         default=_NONE_SENTINEL,
                         tooltip=(
-                            "Select a saved character. Click Refresh in the ComfyUI node "
-                            "editor to update this list after saving new characters."
+                            "Select a saved character. Restart ComfyUI (or use "
+                            "Refresh in ComfyUI Manager) after saving new characters "
+                            "to see them here."
                         ),
                     ),
                 ],
